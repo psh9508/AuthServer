@@ -13,3 +13,17 @@ When it gets a login request, it verifies the login information and returns a `J
   - The datastore that manages JWT refresh tokens.
 - Docker
   - To easily connect various dependencies.
+
+## How to start this project
+
+1. run docker-compose
+
+    ``` bash
+    docker-compose --env-file ../.env up -d
+    ```
+
+2. run this project
+
+    ``` bash
+    uv run main.py
+    ```

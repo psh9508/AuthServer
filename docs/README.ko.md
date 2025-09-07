@@ -9,3 +9,17 @@
   - `JWT`의 Refresh token을 관리하기 위한 저장소
 - Docker
   - 다양한 의존성을 쉽게 연결하기 위해서 사용
+
+## How to start this project
+
+1. docker-compose 파일 실행
+
+    ``` bash
+    docker-compose --env-file ../.env up -d
+    ```
+
+2. project 실행
+
+    ``` bash
+    uv run main.py
+    ```

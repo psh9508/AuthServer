@@ -1,0 +1,11 @@
+db:
+  redis:
+    host: localhost
+    port: 6379
+    db: 0
+  postgres:
+    host: localhost
+    user: postgres
+    port: 5432
+    database: auth_db
+    password: ENV_DB_PASSWORD

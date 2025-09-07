@@ -1,7 +1,7 @@
-from fastapi import FastAPI
 import uvicorn
+import main_app
 
-app = FastAPI()
+app = main_app.get_main_app()
 
 @app.get("/")
 def fire():
