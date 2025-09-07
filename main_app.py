@@ -3,6 +3,7 @@ from fastapi import FastAPI
 import redis.asyncio as redis
 from fastapi.concurrency import asynccontextmanager
 from config.config import load_config
+from src.core.database import init_db_session
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -10,6 +11,9 @@ async def lifespan(app: FastAPI):
     config = load_config()
     print("Loaded configuration...")
     await initializeDependencies(config)
+    print("Loaded Dependencies...")
+    init_db_session()
+    print("Initialized DB session...")
 
     yield
     
@@ -21,10 +25,10 @@ def get_main_app():
 
     
 async def initializeDependencies(config):
-    await _connect_to_redis(config)
-    await _aconnect_to_db(config)
+    await connect_to_redis(config)
+    await aconnect_to_db(config)
 
-async def _connect_to_redis(config):
+async def connect_to_redis(config):
     global redis_client
     host = config['db']['redis']['host']
     port = config['db']['redis'].get('port', 6379)
@@ -37,7 +41,7 @@ async def _connect_to_redis(config):
         print(f"Failed to connect to Redis: {e}")
         raise e
     
-async def _aconnect_to_db(config):
+async def aconnect_to_db(config):
     global db_pool
     db_config = config['db']['postgres']
     user = db_config['user']

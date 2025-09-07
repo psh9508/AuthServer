@@ -1,0 +1,22 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.database import get_session
+from src.repositories.user_repository import UserRepository
+from src.routers.schemas.user import *
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+@router.post("/login")
+async def login(request: UserReq, session: AsyncSession = Depends(get_session)) -> UserRes:
+    user_repo = UserRepository(session)
+    user = await user_repo.login(request.login_id, request.password)
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    return UserRes(
+        id=user.id,
+        login_id=user.login_id,
+        created_at=user.created_at,
+        updated_at=user.updated_at
+    )

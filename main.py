@@ -1,7 +1,10 @@
 import uvicorn
 import main_app
+from src.routers.user import router as user_router
 
 app = main_app.get_main_app()
+
+app.include_router(user_router)
 
 @app.get("/")
 def fire():
