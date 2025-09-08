@@ -19,7 +19,7 @@ When it gets a login request, it verifies the login information and returns a `J
 1. run docker-compose
 
     ``` bash
-    docker-compose --env-file ../.env up -d
+    docker-compose --env-file .env -f dependency/docker-compose.yml up -d
     ```
 
 2. run this project
