@@ -9,3 +9,6 @@ db:
     port: 5432
     database: auth_db
     password: ENV_DB_PASSWORD
+
+jwt:
+  secret: ENV_JWT_SECRET
