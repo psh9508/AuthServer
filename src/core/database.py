@@ -1,10 +1,10 @@
 from collections.abc import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker, AsyncEngine
 from config.config import get_config
+from typing import Optional
 
-async_engine = None
-async_session = None
+async_engine: Optional[AsyncEngine] = None
+async_session: Optional[async_sessionmaker[AsyncSession]] = None
 
 def init_db_session():
     global async_engine, async_session
@@ -22,10 +22,12 @@ def init_db_session():
         echo=True,
     )
     
-    async_session = sessionmaker(
+    async_session = async_sessionmaker(
         async_engine, class_=AsyncSession, expire_on_commit=False
     )
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    if async_session is None:
+        raise RuntimeError("Database session not initialized. Call init_db_session() first.")
     async with async_session() as session:
         yield session
