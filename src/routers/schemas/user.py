@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 class UserReq(BaseModel):
@@ -6,10 +6,9 @@ class UserReq(BaseModel):
     password: str
 
 class UserRes(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     login_id: str
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True

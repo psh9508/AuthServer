@@ -14,9 +14,4 @@ async def login(request: UserReq, session: AsyncSession = Depends(get_session)) 
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    return UserRes(
-        id=user.id,
-        login_id=user.login_id,
-        created_at=user.created_at,
-        updated_at=user.updated_at
-    )
+    return UserRes.model_validate(user)
