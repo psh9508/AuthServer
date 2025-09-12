@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${ENV_DB_PASSWORD}
       POSTGRES_DB: auth_db
     ports:
-      - "5432:5432"
+      - "54321:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init/:/docker-entrypoint-initdb.d/
@@ -18,7 +18,7 @@ services:
     container_name: my_redis
     restart: always
     ports:
-      - "6379:6379"
+      - "63791:6379"
     volumes:
       - redis_data:/data
 
