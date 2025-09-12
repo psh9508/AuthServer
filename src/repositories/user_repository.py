@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, text
+from sqlalchemy import select, insert, text 
 from src.repositories.models.user import User
 
 class UserRepository:
@@ -21,4 +21,23 @@ class UserRepository:
         ).params(password=password)
         
         result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+    
+    async def signup(self, email:str, password: str) -> Optional[User]:
+        import secrets
+        salt =  secrets.token_hex(16)
+
+        import hashlib
+        hashed_password = hashlib.sha256(password.encode() + salt.encode()).digest()
+        
+        # async with self.session.begin():
+        stmt = insert(User).values(
+            login_id = email,
+            password = hashed_password,
+            salt = salt,
+        ).returning(User)
+
+        result = await self.session.execute(stmt)
+        await self.session.commit()
+        
         return result.scalar_one_or_none()

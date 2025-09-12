@@ -7,7 +7,7 @@ from src.routers.schemas.user import *
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/login")
-async def login(request: UserReq, session: AsyncSession = Depends(get_session)) -> UserRes:
+async def login(request: LoginReq, session: AsyncSession = Depends(get_session)) -> LoginRes:
     user_repo = UserRepository(session)
 
     user = await user_repo.get(request.login_id)
@@ -16,4 +16,20 @@ async def login(request: UserReq, session: AsyncSession = Depends(get_session)) 
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    return UserRes.model_validate(user)
+    return LoginRes.model_validate(user)
+
+@router.post('/signup')
+async def signup(request: SignupReq, session: AsyncSession = Depends(get_session)):
+    if not request.email or not request.password:
+        raise HTTPException(status_code=400, detail="Email and password are required")
+    
+    user_repo = UserRepository(session)
+    user = await user_repo.get(request.email)
+
+    if user:
+        raise HTTPException(status_code=409, detail="User with this email already exists")
+    
+    inserted_user = await user_repo.signup(request.email, request.password)
+
+    return LoginRes.model_validate(inserted_user)
+    

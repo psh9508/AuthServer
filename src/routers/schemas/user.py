@@ -1,14 +1,18 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
-class UserReq(BaseModel):
+class LoginReq(BaseModel):
     login_id: str
     password: str
 
-class UserRes(BaseModel):
+class LoginRes(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     id: int
     login_id: str
     created_at: datetime
     updated_at: datetime
+
+class SignupReq(BaseModel):
+    email: str
+    password: str
