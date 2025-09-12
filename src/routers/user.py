@@ -15,6 +15,8 @@ async def login(request: LoginReq, session: AsyncSession = Depends(get_session))
     
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    elif not bool(user.email_verified):
+        raise HTTPException(status_code=403, detail="Email not verified")
     
     return LoginRes.model_validate(user)
 

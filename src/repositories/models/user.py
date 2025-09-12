@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, LargeBinary, DateTime, func
+from sqlalchemy import Column, Integer, String, LargeBinary, DateTime, Boolean, func
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -10,6 +10,7 @@ class User(Base):
     login_id = Column(String(255), unique=True, nullable=False)
     password = Column(LargeBinary, nullable=False)
     salt = Column(String(32), nullable=False)
+    email_verified = Column(Boolean, nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 

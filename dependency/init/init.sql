@@ -3,15 +3,17 @@ CREATE TABLE users (
     login_id VARCHAR(255) NOT NULL UNIQUE,
     password BYTEA NOT NULL,
     salt VARCHAR(32) NOT NULL,
+    email_verified BOOL NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-INSERT INTO users (login_id, password, salt)
+INSERT INTO users (login_id, password, salt, email_verified)
 VALUES (
     'admin',
     digest('admin' || 'random_salt', 'sha256'),
-    'random_salt'
+    'random_salt',
+    true
 );
