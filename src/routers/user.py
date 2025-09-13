@@ -13,9 +13,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.post("/login")
 async def login(request: LoginReq, session: AsyncSession = Depends(get_session)) -> LoginRes:
     user_repo = UserRepository(session)
-
-    user = await user_repo.get(request.login_id)
-    user = user and await user_repo.login(request.login_id, request.password + str(user.salt))
+    
+    user = await user_repo.alogin(request.login_id, request.password)
     
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -32,12 +31,12 @@ async def signup(request: SignupReq,
         raise HTTPException(status_code=400, detail="Email and password are required")
     
     user_repo = UserRepository(session)
-    user = await user_repo.get(request.email)
+    user = await user_repo.aget(request.email)
 
     if user:
         raise HTTPException(status_code=409, detail="User with this email already exists")
     
-    inserted_user = await user_repo.signup(request.email, request.password)
+    inserted_user = await user_repo.asignup(request.email, request.password)
 
     # Send email verification message to the email server
     email_verification_message = MessageMaker.make_start_message(EmailVerificationMessage, 
