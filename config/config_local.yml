@@ -1,3 +1,6 @@
+server_name: auth
+exchange_name: my_exchange.topic
+
 db:
   redis:
     host: localhost

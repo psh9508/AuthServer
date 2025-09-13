@@ -1,10 +1,15 @@
 import os
 
+from src.data_model.mq_config import MQConfig
+
 _config = None
+_mq_config: MQConfig
 
 def load_config(environment: str = 'local'):
     import yaml
     global _config
+    global _mq_config
+
     if _config is None:
         config_file_path = f'./config/config_{environment}.yml'
         if not os.path.exists(config_file_path):
@@ -19,12 +24,25 @@ def load_config(environment: str = 'local'):
             print(".env file not found or could not be loaded.")
 
         _replace_env_values(_config)
+
+    if not _config['server_name'] or not _config['exchange_name']:
+        raise ValueError("Missing required configuration values: 'server_name' or 'exchange_name'")
+
+    _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
     return _config
+
 
 def get_config():
     if _config is None:
         raise RuntimeError("Config not loaded. Call load_config() first.")
     return _config
+
+
+def get_rabbitmq_config() -> MQConfig:
+    if _mq_config is None:
+        raise RuntimeError("RabbitMQ config is not set properly.")
+    return _mq_config
+
 
 def _replace_env_values(config):
     for key, value in config.items():
