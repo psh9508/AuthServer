@@ -25,10 +25,10 @@ def get_main_app():
 
     
 async def initializeDependencies(config):
-    await connect_to_redis(config)
+    await aconnect_to_redis(config)
     await aconnect_to_db(config)
 
-async def connect_to_redis(config):
+async def aconnect_to_redis(config):
     global redis_client
     host = config['db']['redis']['host']
     port = config['db']['redis'].get('port', 6379)
