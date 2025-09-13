@@ -10,5 +10,12 @@ db:
     database: auth_db
     password: ENV_DB_PASSWORD
 
+rabbitmq:
+  host: localhost
+  port: 5672
+  user: user
+  password: ENV_RABBITMQ_PASSWORD
+  vhost: my_vhost
+  
 jwt:
   secret: ENV_JWT_SECRET
