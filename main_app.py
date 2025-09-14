@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     print("Loaded configuration...")
     await initializeDependencies(config)
     print("Loaded Dependencies...")
-    await ainitailize_rabbitmq(config)
+    await ainitialize_rabbitmq(config)
     print("Initialized RabbitMQ client...")
     init_db_session()
     print("Initialized DB session...")
@@ -70,7 +70,7 @@ async def aconnect_to_db(config):
         raise e
     
 
-async def ainitailize_rabbitmq(config):
+async def ainitialize_rabbitmq(config):
     global rabbitmq_client
     rabbitmq_client = RabbitMQClient(config)
     await rabbitmq_client.ainitialize_message_queue()

@@ -9,7 +9,7 @@ class UserRepository:
     async def aget(self, login_id: str) -> User | None:
         stmt = select(User).where(User.login_id == login_id)
         
-        result = result = await self.session.execute(stmt)
+        result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
         
 
