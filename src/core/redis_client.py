@@ -8,7 +8,7 @@ class RedisClient:
         self._client: Optional[redis.Redis] = None
         self.prefix = ''
     
-    def _get_key(self, key: str) -> str:
+    def _append_prefix(self, key: str) -> str:
         if not self.prefix:
             raise ValueError("Prefix is not set")
 
@@ -45,7 +45,7 @@ class RedisClient:
     async def aget(self, key: str) -> Optional[Any]:
         try:
             client = await self.aget_client()
-            prefixed_key = self._get_key(key)
+            prefixed_key = self._append_prefix(key)
             value = await client.get(prefixed_key)
             if value is None:
                 return None
@@ -61,7 +61,7 @@ class RedisClient:
         try:
             client = await self.aget_client()
 
-            prefixed_key = self._get_key(key)
+            prefixed_key = self._append_prefix(key)
             if isinstance(value, (dict, list)):
                 value = json.dumps(value)
             
@@ -76,7 +76,7 @@ class RedisClient:
     async def aclean_up(self, key: str, batch_size: int = 10) -> bool:
         try:
             client = await self.aget_client()
-            pattern = self._get_key(f"{key}:*")
+            pattern = self._append_prefix(f"{key}:*")
             deleted_count = 0
             cursor = 0
             
@@ -98,7 +98,7 @@ class RedisClient:
                 raise ValueError("key is required for deletion")
 
             client = await self.aget_client()
-            prefixed_key = self._get_key(f'{key}')
+            prefixed_key = self._append_prefix(f'{key}')
             result = await client.delete(prefixed_key)
             return result > 0
         except Exception as e:
@@ -108,7 +108,7 @@ class RedisClient:
     async def aexists(self, key: str) -> bool:
         try:
             client = await self.aget_client()
-            prefixed_key = self._get_key(key)
+            prefixed_key = self._append_prefix(key)
             return await client.exists(prefixed_key) > 0
         except Exception as e:
             print(f"Redis EXISTS error: {e}")
@@ -117,7 +117,7 @@ class RedisClient:
     async def aexpire(self, key: str, ttl: int) -> bool:
         try:
             client = await self.aget_client()
-            prefixed_key = self._get_key(key)
+            prefixed_key = self._append_prefix(key)
             return await client.expire(prefixed_key, ttl)
         except Exception as e:
             print(f"Redis EXPIRE error: {e}")
@@ -126,7 +126,7 @@ class RedisClient:
     async def attl(self, key: str) -> int:
         try:
             client = await self.aget_client()
-            prefixed_key = self._get_key(key)
+            prefixed_key = self._append_prefix(key)
             return await client.ttl(prefixed_key)
         except Exception as e:
             print(f"Redis TTL error: {e}")
