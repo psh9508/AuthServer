@@ -1,49 +1,33 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.data_model.rabbitmq_messages.email_verification_message import EmailVerificationMessage
-from src.core.message_maker import MessageMaker
-from src.core.database import get_session
-from main_app import get_rabbitmq_client
-from src.core.rabbitmq import RabbitMQClient
-from src.repositories.user_repository import UserRepository
+from src.services.exceptions.user_exception import *
+from src.factories.services import get_user_service
+from src.services.user_service import UserService
 from src.routers.schemas.user import *
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/login")
-async def login(request: LoginReq, session: AsyncSession = Depends(get_session)) -> LoginRes:
-    user_repo = UserRepository(session)
+async def login(request: LoginReq, user_service: UserService = Depends(get_user_service)) -> LoginRes:
+    if not request.login_id or not request.password:
+        raise HTTPException(status_code=400, detail="Login_id and password are required")
     
-    user = await user_repo.alogin(request.login_id, request.password)
-    
-    if not user:
+    try:
+        loggedin_user = await user_service.alogin(request.login_id, request.password)
+        return LoginRes.model_validate(loggedin_user)
+    except UserNotFoundError:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    elif not bool(user.email_verified):
+    except EmailNotVerifiedError:
         raise HTTPException(status_code=403, detail="Email not verified")
-    
-    return LoginRes.model_validate(user)
+
 
 @router.post('/signup')
-async def signup(request: SignupReq,
-                 session: AsyncSession = Depends(get_session),
-                 message_client: RabbitMQClient = Depends(get_rabbitmq_client)):
+async def signup(request: SignupReq, user_service: UserService = Depends(get_user_service)) -> LoginRes:
     if not request.email or not request.password:
         raise HTTPException(status_code=400, detail="Email and password are required")
     
-    user_repo = UserRepository(session)
-    user = await user_repo.aget(request.email)
-
-    if user:
+    try:
+        inserted_user = await user_service.asignup(request.email, request.password)
+        return LoginRes.model_validate(inserted_user)
+    except DuplicateEmailError:
         raise HTTPException(status_code=409, detail="User with this email already exists")
-    
-    inserted_user = await user_repo.asignup(request.email, request.password)
-
-    # Send email verification message to the email server
-    email_verification_message = MessageMaker.make_start_message(EmailVerificationMessage, 
-                                                                 target='email', 
-                                                                 method='verification',
-                                                                 email=str(inserted_user.login_id))
-    message_client.send_message(email_verification_message)
-
-    return LoginRes.model_validate(inserted_user)
-    
+        
