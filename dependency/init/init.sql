@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 INSERT INTO users (login_id, password, salt, email_verified)
 VALUES (
-    'admin',
+    'admin@admin.com',
     digest('admin' || 'random_salt', 'sha256'),
     'random_salt',
     true
