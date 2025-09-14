@@ -6,6 +6,7 @@ db:
     host: localhost
     port: 63791
     db: 0
+    prefix: 'auth'
   postgres:
     host: localhost
     user: postgres
@@ -22,3 +23,4 @@ rabbitmq:
   
 jwt:
   secret: ENV_JWT_SECRET
+  refresh_secret: ENV_JWT_REFRESH_SECRET

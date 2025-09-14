@@ -22,8 +22,9 @@ class UserService:
         elif not bool(user.email_verified):
             raise EmailNotVerifiedError("Email not verified")
         
-        jwt = JwtLogic.create_user_jwt(user)
-        return LoginRes(access_token=jwt)
+        jwt_result = await JwtLogic.acreate_user_jwt(user)
+        return LoginRes(access_token=jwt_result['access_token'], 
+                        refresh_token=jwt_result['refresh_token'])
 
 
     async def asignup(self, email: str, password: str) -> User:

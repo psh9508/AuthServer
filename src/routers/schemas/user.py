@@ -7,6 +7,7 @@ class LoginReq(BaseModel):
 
 class LoginRes(BaseModel):
     access_token: str
+    refresh_token: str
 
 class SignupReq(BaseModel):
     email: EmailStr

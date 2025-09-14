@@ -27,6 +27,8 @@ def load_config(environment: str = 'local'):
 
     if not _config['server_name'] or not _config['exchange_name']:
         raise ValueError("Missing required configuration values: 'server_name' or 'exchange_name'")
+    if not _config['jwt']['refresh_secret'] or not _config['jwt']['secret']:
+        raise ValueError("Missing required configuration values: 'refresh_secret' or 'secret'")
 
     _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
     return _config

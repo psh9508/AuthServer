@@ -1,10 +1,10 @@
 import asyncpg
 from fastapi import FastAPI
-import redis.asyncio as redis
 from fastapi.concurrency import asynccontextmanager
 from config.config import load_config
 from src.core.jwt_logic import JwtLogic
 from src.core.database import init_db_session
+from src.core.redis_client import ainitialize_redis
 from src.core.rabbitmq import RabbitMQClient
 
 @asynccontextmanager
@@ -31,22 +31,8 @@ def get_main_app():
 
     
 async def initializeDependencies(config):
-    await aconnect_to_redis(config)
+    await ainitialize_redis(config)
     await aconnect_to_db(config)
-
-
-async def aconnect_to_redis(config):
-    global redis_client
-    host = config['db']['redis']['host']
-    port = config['db']['redis'].get('port', 6379)
-    redis_url = f"redis://{host}:{port}"
-    redis_client = await redis.Redis.from_url(redis_url, decode_responses=True)
-    try:
-        await redis_client.ping()
-        print("Connected to Redis")
-    except Exception as e:
-        print(f"Failed to connect to Redis: {e}")
-        raise e
     
 
 async def aconnect_to_db(config):
