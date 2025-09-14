@@ -6,19 +6,7 @@ class LoginReq(BaseModel):
     password: str
 
 class LoginRes(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    
-    id: int
-    login_id: EmailStr
-    created_at: datetime
-    updated_at: datetime
-
-    @field_validator('login_id')
-    @classmethod
-    def email_max_length(cls, v):
-        if len(v) > 255:
-            raise ValueError('login_id must be at most 255 characters')
-        return v
+    access_token: str
 
 class SignupReq(BaseModel):
     email: EmailStr
@@ -30,3 +18,10 @@ class SignupReq(BaseModel):
         if len(v) > 255:
             raise ValueError('Email must be at most 255 characters')
         return v
+    
+class SignupRes(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: int
+    created_at: datetime
+    updated_at: datetime

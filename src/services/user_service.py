@@ -1,5 +1,7 @@
+from src.routers.schemas.user import LoginRes
 from src.services.exceptions.user_exception import *
 from src.repositories.models.user import User
+from src.core.jwt_logic import JwtLogic
 from src.core.message_maker import MessageMaker
 from src.core.rabbitmq import RabbitMQClient
 from src.repositories.user_repository import UserRepository
@@ -12,7 +14,7 @@ class UserService:
         self.message_client = message_client
 
 
-    async def alogin(self, login_id: str, password: str) -> User:
+    async def alogin(self, login_id: str, password: str) -> LoginRes:
         user = await self.user_repo.alogin(login_id, password)
         
         if not user:
@@ -20,7 +22,8 @@ class UserService:
         elif not bool(user.email_verified):
             raise EmailNotVerifiedError("Email not verified")
         
-        return user
+        jwt = JwtLogic.create_user_jwt(user)
+        return LoginRes(access_token=jwt)
 
 
     async def asignup(self, email: str, password: str) -> User:

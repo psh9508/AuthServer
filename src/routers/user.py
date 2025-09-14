@@ -12,8 +12,8 @@ async def login(request: LoginReq, user_service: UserService = Depends(get_user_
         raise HTTPException(status_code=400, detail="Login_id and password are required")
     
     try:
-        loggedin_user = await user_service.alogin(request.login_id, request.password)
-        return LoginRes.model_validate(loggedin_user)
+        login_res = await user_service.alogin(request.login_id, request.password)
+        return login_res
     except UserNotFoundError:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     except EmailNotVerifiedError:
@@ -21,13 +21,13 @@ async def login(request: LoginReq, user_service: UserService = Depends(get_user_
 
 
 @router.post('/signup')
-async def signup(request: SignupReq, user_service: UserService = Depends(get_user_service)) -> LoginRes:
+async def signup(request: SignupReq, user_service: UserService = Depends(get_user_service)) -> SignupRes:
     if not request.email or not request.password:
         raise HTTPException(status_code=400, detail="Email and password are required")
     
     try:
         inserted_user = await user_service.asignup(request.email, request.password)
-        return LoginRes.model_validate(inserted_user)
+        return SignupRes.model_validate(inserted_user)
     except DuplicateEmailError:
         raise HTTPException(status_code=409, detail="User with this email already exists")
         

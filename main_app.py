@@ -3,6 +3,7 @@ from fastapi import FastAPI
 import redis.asyncio as redis
 from fastapi.concurrency import asynccontextmanager
 from config.config import load_config
+from src.core.jwt_logic import JwtLogic
 from src.core.database import init_db_session
 from src.core.rabbitmq import RabbitMQClient
 
@@ -10,6 +11,7 @@ from src.core.rabbitmq import RabbitMQClient
 async def lifespan(app: FastAPI):
     print("Starting up...")
     config = load_config()
+    JwtLogic.initialize(config)
     print("Loaded configuration...")
     await initializeDependencies(config)
     print("Loaded Dependencies...")
