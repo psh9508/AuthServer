@@ -2,13 +2,14 @@ import asyncpg
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from config.config import load_config
+from src.middleware.http_middleware import HttpMiddleware
 from src.core.jwt_logic import JwtLogic
 from src.core.database import init_db_session
 from src.core.redis_client import ainitialize_redis
 from src.core.rabbitmq import RabbitMQClient
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     print("Starting up...")
     config = load_config()
     JwtLogic.initialize(config)
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
 
 def get_main_app():
     app = FastAPI(lifespan=lifespan)
+    app.add_middleware(HttpMiddleware)
     return app
 
     

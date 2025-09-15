@@ -18,6 +18,14 @@ class JwtLogic:
         cls.refresh_token_expire = timedelta(weeks=1)
 
     @classmethod
+    async def adecode_access_token(cls, token: str) -> dict | None:
+        try:
+            return jwt.decode(token, cls.SECRET_KEY, [cls.ALGORITHM])
+        except Exception:
+            # Expired or tampered token
+            return None
+        
+    @classmethod
     async def acreate_user_jwt(cls, id: str, expire_seconds: int = 1800):
         if not cls.is_initialized:
             raise RuntimeError("JwtLogic has not been initialized")
