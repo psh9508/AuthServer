@@ -8,7 +8,8 @@ from src.core.jwt_logic import JwtLogic
 open_apis: list[str] = [
     '/docs',
     '/healthcheck', 
-    '/users/login',    
+    '/user/login',
+    '/user/signup',
 ]
 
 class HttpMiddleware(BaseHTTPMiddleware):

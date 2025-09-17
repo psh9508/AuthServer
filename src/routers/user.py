@@ -4,7 +4,7 @@ from src.factories.services import get_user_service
 from src.services.user_service import UserService
 from src.routers.schemas.user import *
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/user", tags=["user"])
 
 @router.post("/login")
 async def login(request: LoginReq, user_service: UserService = Depends(get_user_service)) -> LoginRes:
