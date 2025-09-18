@@ -1,17 +1,16 @@
 from src.routers.schemas.user import LoginRes
 from src.services.exceptions.user_exception import *
+from src.services.message_queue_service import MessageQueueService
 from src.repositories.models.user import User
 from src.core.jwt_logic import JwtLogic
-from src.core.message_maker import MessageMaker
-from src.core.rabbitmq import RabbitMQClient
 from src.repositories.user_repository import UserRepository
 from src.data_model.rabbitmq_messages.email_verification_message import EmailVerificationMessage
 
 
 class UserService:
-    def __init__(self, user_repo: UserRepository, message_client: RabbitMQClient):
+    def __init__(self, user_repo: UserRepository, message_queue_service: MessageQueueService):
         self.user_repo = user_repo
-        self.message_client = message_client
+        self.message_queue_service = message_queue_service
 
 
     async def alogin(self, login_id: str, password: str) -> LoginRes:
@@ -36,10 +35,6 @@ class UserService:
         inserted_user = await self.user_repo.asignup(email, password)
 
         # Send email verification message to the email server
-        email_verification_message = MessageMaker.make_start_message(EmailVerificationMessage, 
-                                                                    target='email', 
-                                                                    method='verification',
-                                                                    email=str(inserted_user.login_id))
-        self.message_client.send_message(email_verification_message)
+        await self.message_queue_service.asend_email_verification(str(inserted_user.login_id))
 
         return inserted_user

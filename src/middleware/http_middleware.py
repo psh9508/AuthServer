@@ -42,8 +42,6 @@ class HttpMiddleware(BaseHTTPMiddleware):
         except HTTPException:
             raise
         except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Internal server error"
-            )
+            # raise it as itself not in production mode.
+            raise
         
