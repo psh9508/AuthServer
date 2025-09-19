@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Union
 import jwt
-from src.core.redis_client import redis_client
+
+from src.factories.redis import get_redis_service
 
 class JwtLogic:
     SECRET_KEY: str
@@ -36,9 +37,8 @@ class JwtLogic:
         access_token = cls._get_access_token_jwt(id, expire_seconds)
         refresh_token = cls._get_refresh_token_jwt(id)
 
-        redis_refresh_token_key = f'refresh:{id}'
-        await redis_client.adelete(redis_refresh_token_key)
-        await redis_client.aset(redis_refresh_token_key, refresh_token, int(cls.refresh_token_expire.total_seconds()))
+        redis_service = get_redis_service()
+        await redis_service.arefresh_refresh_token(id, refresh_token, int(cls.refresh_token_expire.total_seconds()))
 
         return {
             'access_token': access_token,
@@ -65,8 +65,8 @@ class JwtLogic:
         if user_info['sub'] != refresh_payload['sub']:
           raise PermissionError("Token user ID mismatch")
         
-        refresh_token_key = cls._get_redis_refresh_token_key(user_info['sub'])
-        stored_refresh_token = await redis_client.aget(refresh_token_key)
+        redis_service = get_redis_service()
+        stored_refresh_token = await redis_service.aget_refresh_token(user_info['sub'])
 
         if not stored_refresh_token:
             raise RuntimeError("Refresh token not found or expired")
@@ -94,6 +94,3 @@ class JwtLogic:
     def _get_refresh_token_jwt(cls, id: str):
         return cls._get_jwt(cls.REFRESH_KEY, id, int(cls.refresh_token_expire.total_seconds()))
     
-    @classmethod
-    def _get_redis_refresh_token_key(cls, id: str) -> str:
-        return f'refresh:{id}'

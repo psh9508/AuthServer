@@ -3,15 +3,15 @@ import redis.asyncio as redis
 from typing import Any, Optional
 from config.config import get_config
 
-class RedisClient:
+class RedisCore:
     def __init__(self):
         self._client: Optional[redis.Redis] = None
         self.prefix = ''
-    
-    def _append_prefix(self, key: str) -> str:
-        if not self.prefix:
-            raise ValueError("Prefix is not set")
 
+    def set_prefix(self, prefix: str):
+        self.prefix = prefix
+    
+    def _append_prefix(self, key: str) -> str:  
         return f"{self.prefix}:{key}"    
     
     async def ainitialize(self, config) -> redis.Redis:
@@ -133,11 +133,14 @@ class RedisClient:
             return -2
 
 
-redis_client = RedisClient()
+_redis_client = RedisCore()
 
 async def ainitialize_redis(config):
     try:
-        redis = await redis_client.ainitialize(config)
+        redis = await _redis_client.ainitialize(config)
         await redis.ping()
     except Exception as e:
         raise RuntimeError("Failed to initialize Redis") from e
+
+def get_redis_client() -> RedisCore:
+    return _redis_client

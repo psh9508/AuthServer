@@ -6,7 +6,7 @@ from src.services.message_queue_service import MessageQueueService
 from src.middleware.http_middleware import HttpMiddleware
 from src.core.jwt_logic import JwtLogic
 from src.core.database import init_db_session
-from src.core.redis_client import ainitialize_redis
+from src.core.redis_core import ainitialize_redis
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
