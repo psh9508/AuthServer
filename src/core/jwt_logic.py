@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import Union
 import jwt
 from src.core.redis_client import redis_client
-from src.repositories.models.user import User
 
 class JwtLogic:
     SECRET_KEY: str
