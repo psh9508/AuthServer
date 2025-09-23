@@ -1,4 +1,5 @@
 from src.routers.schemas.user import LoginRes
+from src.services.outbox_service import OutboxService
 from src.services.exceptions.user_exception import *
 from src.services.message_queue_service import MessageQueueService
 from src.repositories.models.user import User
@@ -8,9 +9,9 @@ from src.data_model.rabbitmq_messages.email_verification_message import EmailVer
 
 
 class UserService:
-    def __init__(self, user_repo: UserRepository, message_queue_service: MessageQueueService):
+    def __init__(self, user_repo: UserRepository, outbox_service: OutboxService):
         self.user_repo = user_repo
-        self.message_queue_service = message_queue_service
+        self.outbox_service = outbox_service
 
 
     async def alogin(self, login_id: str, password: str) -> LoginRes:
@@ -30,11 +31,9 @@ class UserService:
         user = await self.user_repo.aget(email)
 
         if user:
-            raise DuplicateEmailError("User with this email already exists")
-        
-        inserted_user = await self.user_repo.asignup(email, password)
+            raise DuplicateEmailError("Uasend_email_verificationser with this email already exists")
 
-        # Send email verification message to the email server
-        await self.message_queue_service.asend_email_verification(str(inserted_user.login_id))
+        inserted_user = await self.user_repo.asignup(email, password)
+        await self.outbox_service.ainsert_email_verification(str(inserted_user.login_id))
 
         return inserted_user

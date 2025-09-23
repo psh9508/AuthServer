@@ -29,18 +29,21 @@ class UserRepository:
         return result.scalar_one_or_none()
     
     async def asignup(self, email:str, password: str) -> User:
-        import secrets
-        salt =  secrets.token_hex(16)
-        hashed_password = self.get_hased_password(password, salt)
-        
-        stmt = insert(User).values(
-            login_id = email,
-            password = hashed_password,
-            salt = salt,
-        ).returning(User)
+        try:
+            import secrets
+            salt =  secrets.token_hex(16)
+            hashed_password = self.get_hased_password(password, salt)
+            
+            stmt = insert(User).values(
+                login_id = email,
+                password = hashed_password,
+                salt = salt,
+            ).returning(User)
 
-        result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
+            result = await self.session.execute(stmt)
+            return result.scalar_one_or_none()
+        except Exception as e:
+            raise RuntimeError("Failed to insert user") from e
 
     def get_hased_password(self, password: str, salt: str):
         import hashlib
