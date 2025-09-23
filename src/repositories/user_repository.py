@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert, text 
-from src.repositories.models.user import User
+from sqlalchemy import select, insert 
+from src.repositories.schemas.user import User
 
 class UserRepository:
     def __init__(self, session: AsyncSession):

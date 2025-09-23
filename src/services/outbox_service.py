@@ -1,6 +1,6 @@
 from src.data_model.rabbitmq_messages.email_verification_message import EmailVerificationMessage
 from src.core.message_maker import MessageMaker
-from src.repositories.models.outbox_event import OutboxEvent
+from src.repositories.schemas.outbox_event import OutboxEvent 
 from src.repositories.outbox_repository import OutboxRepository
 
 class OutboxService:

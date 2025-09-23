@@ -1,11 +1,9 @@
-from src.routers.schemas.user import LoginRes
+from src.routers.models.user import LoginRes
 from src.services.outbox_service import OutboxService
 from src.services.exceptions.user_exception import *
-from src.services.message_queue_service import MessageQueueService
-from src.repositories.models.user import User
+from src.repositories.schemas.user import User
 from src.core.jwt_logic import JwtLogic
 from src.repositories.user_repository import UserRepository
-from src.data_model.rabbitmq_messages.email_verification_message import EmailVerificationMessage
 
 
 class UserService:

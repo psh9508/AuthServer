@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from src.services.exceptions.user_exception import *
 from src.factories.services import get_user_service
 from src.services.user_service import UserService
-from src.routers.schemas.user import *
+from src.routers.models.user import *
 
 router = APIRouter(prefix="/user", tags=["user"])
 
