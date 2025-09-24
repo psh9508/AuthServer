@@ -1,7 +1,9 @@
+import asyncio
 import asyncpg
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from config.config import load_config
+from src.core.worker import Worker
 from src.services.message_queue_service import MessageQueueService
 from src.middleware.http_middleware import HttpMiddleware
 from src.core.jwt_logic import JwtLogic
@@ -20,10 +22,14 @@ async def lifespan(_: FastAPI):
     print("Initialized RabbitMQ client...")
     init_db_session()
     print("Initialized DB session...")
-
+    worker = Worker()
+    asyncio.create_task(worker.astart_worker())
+    print("The worker has been started...")
     yield
     
     print("Shutting down...")
+    await worker.astop_worker()
+    print("The worker has been shut down...")
 
 
 def get_main_app():
