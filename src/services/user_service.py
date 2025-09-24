@@ -1,4 +1,5 @@
 from src.routers.models.user import LoginRes
+from src.services.redis_service import RedisService
 from src.services.outbox_service import OutboxService
 from src.services.exceptions.user_exception import *
 from src.repositories.schemas.user import User
@@ -7,9 +8,10 @@ from src.repositories.user_repository import UserRepository
 
 
 class UserService:
-    def __init__(self, user_repo: UserRepository, outbox_service: OutboxService):
+    def __init__(self, user_repo: UserRepository, outbox_service: OutboxService, redis_service: RedisService):
         self.user_repo = user_repo
         self.outbox_service = outbox_service
+        self.redis_service = redis_service
 
 
     async def alogin(self, login_id: str, password: str) -> LoginRes:
@@ -32,6 +34,7 @@ class UserService:
             raise DuplicateEmailError("Uasend_email_verificationser with this email already exists")
 
         inserted_user = await self.user_repo.asignup(email, password)
+        await self.redis_service.aset_email_verification_code(str(inserted_user.login_id))
         await self.outbox_service.ainsert_email_verification(str(inserted_user.login_id))
 
         return inserted_user

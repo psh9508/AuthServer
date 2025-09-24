@@ -1,6 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class RefreshAccessTokenReq(BaseModel):
-    access_token: str
-    refresh_token: str
+    access_token: str = Field(...)
+    refresh_token: str = Field(...)
+
+class EmailVerificationReq(BaseModel):
+    user_id: str = Field(...)
+    verification_code: str = Field(..., pattern=r'^\d{6}$')

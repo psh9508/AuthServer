@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert 
+from sqlalchemy import select, insert, update 
 from src.repositories.schemas.user import User
 
 class UserRepository:
@@ -19,7 +19,7 @@ class UserRepository:
         if not user:
             return None
 
-        hashed_password = self.get_hased_password(password, str(user.salt))
+        hashed_password = self._get_hased_password(password, str(user.salt))
         stmt = select(User).where(
             User.login_id == login_id,
             User.password == hashed_password,
@@ -32,7 +32,7 @@ class UserRepository:
         try:
             import secrets
             salt =  secrets.token_hex(16)
-            hashed_password = self.get_hased_password(password, salt)
+            hashed_password = self._get_hased_password(password, salt)
             
             stmt = insert(User).values(
                 login_id = email,
@@ -45,6 +45,20 @@ class UserRepository:
         except Exception as e:
             raise RuntimeError("Failed to insert user") from e
 
-    def get_hased_password(self, password: str, salt: str):
+
+    async def averify_user_email(self, email: str):
+        try:
+            stmt = (
+                update(User)
+                .where(User.login_id == email)
+                .values(email_verified=True)
+            )
+            result = await self.session.execute(stmt)
+            return result.rowcount
+        except Exception as e:
+            raise RuntimeError("Failed to update email_verified") from e
+
+
+    def _get_hased_password(self, password: str, salt: str):
         import hashlib
         return hashlib.sha256(password.encode() + salt.encode()).digest()

@@ -1,6 +1,5 @@
-from typing import Any, Optional
-from fastapi import Depends
-from src.core.redis_core import get_redis_client, RedisCore
+from src.core.redis_core import RedisCore
+import secrets
 
 class RedisService:
     def __init__(self, redis_core: RedisCore):
@@ -45,3 +44,35 @@ class RedisService:
             return await self.redis_core.aget(key)
         except Exception as e:
             raise
+
+
+    async def aset_email_verification_code(self, user_id: str):
+        try:
+            key = f'email_verification:{user_id}'
+            ttl = 5 * 60 
+            self.redis_core.set_prefix('email')
+            verification_code = f"{secrets.randbelow(1000000):06d}"
+            await self.redis_core.adelete(key)
+            await self.redis_core.aset(key, str(verification_code), ttl)
+        except Exception as e:
+            raise
+
+
+    async def aget_email_verification_code(self, user_id: str) -> str | None:
+        try:
+            key = f'email_verification:{user_id}'
+            self.redis_core.set_prefix('email')
+            verification_code = await self.redis_core.aget(key)
+            return str(verification_code)
+        except Exception as e:
+            raise
+
+
+    async def adelete_email_verification_code(self, user_id: str):
+        try:
+            key = f'email_verification:{user_id}'
+            self.redis_core.set_prefix('email')
+            await self.redis_core.adelete(key)
+        except Exception as e:
+            # logic is going when it has exception
+            pass 

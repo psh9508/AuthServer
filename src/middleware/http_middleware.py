@@ -10,6 +10,7 @@ open_apis: list[str] = [
     '/healthcheck', 
     '/user/login',
     '/user/signup',
+    '/auth/user_verification',
 ]
 
 class HttpMiddleware(BaseHTTPMiddleware):

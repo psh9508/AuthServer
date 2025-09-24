@@ -1,9 +1,39 @@
-from src.routers.schemas.user import LoginRes
+from src.repositories.user_repository import UserRepository
+from src.services.redis_service import RedisService
+from src.routers.models.user import LoginRes
 from src.core.jwt_logic import JwtLogic
 
 
 class AuthService:
+    def __init__(self, user_repo: UserRepository, redis_service: RedisService):
+        self.user_repo = user_repo
+        self.redis_service = redis_service
+
+
     async def arefresh_access_token(self, access_token: str, refresh_token: str) -> LoginRes:
         refresh_result = await JwtLogic.arefresh_access_token(access_token, refresh_token)
         return LoginRes(access_token=refresh_result['access_token'],
                         refresh_token=refresh_result['refresh_token'])
+    
+
+    async def averify_user(self, user_id: str, verification_code: str) -> bool:
+        stored_verification_code = await self.redis_service.aget_email_verification_code(user_id)
+
+        is_verified = stored_verification_code == verification_code
+
+        if is_verified:
+            await self._averify_user(user_id)
+            await self.redis_service.adelete_email_verification_code(user_id)
+
+        return is_verified
+
+
+    async def _averify_user(self, email: str):
+        try:
+            update_count = await self.user_repo.averify_user_email(email)
+            if update_count != 1:
+                raise
+            
+            return True
+        except Exception as e:
+            raise
