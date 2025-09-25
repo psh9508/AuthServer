@@ -14,30 +14,30 @@ class Worker:
     def __init__(self):
         self.INTERVAL = 0.5
         self.running = False
-        self.session: Optional[AsyncSession] = None
         self.outbox_repo: Optional[OutboxRepository] = None
         self.rabbitmq_client: RabbitMQClient = get_rabbitmq_client()
    
 
     async def astart_worker(self):
         self.running = True
-        await self._ainitialize()
-        
         logger.info("Worker started")
-        
-        while self.running:
-            try:
-                await self._aprocess_outbox_events()
-                await asyncio.sleep(self.INTERVAL)
-            except Exception as e:
-                logger.error(f"Worker error: {e}")
-                await asyncio.sleep(1)
 
+        async for session in get_session():
+            self.outbox_repo = OutboxRepository(session)
 
-    async def _ainitialize(self):
-        self.session = await anext(get_session())
-        self.outbox_repo = OutboxRepository(self.session)
-    
+            while self.running:
+                try:
+                    await self._aprocess_outbox_events()
+                    await session.commit()
+                    await asyncio.sleep(self.INTERVAL)
+                except Exception as e:
+                    logger.error(f"Worker error: {e}")
+                    await session.rollback()
+                    await asyncio.sleep(1)
+            
+            logger.info("Worker stopped")
+            break
+
 
     async def _aprocess_outbox_events(self):
         if not self.outbox_repo:
@@ -46,7 +46,7 @@ class Worker:
             
         try:
             events = await self.outbox_repo.get_pending_events(limit=100)
-            
+                
             for event in events:
                 try:
                     import json
@@ -58,9 +58,9 @@ class Worker:
                     self.rabbitmq_client.send_message(mq_message)
                     
                     await self.outbox_repo.update_status(
-                        event_id=event.id,
-                        status='SENT'
-                    )
+                            event_id=event.id,
+                            status='SENT'
+                        )
                     
                     logger.info(f"Successfully sent event {event.id}")
                     
@@ -72,13 +72,11 @@ class Worker:
                     )
                     
                     logger.error(f"Failed to send event {event.id}: {e}")
-                    
+                        
         except Exception as e:
             logger.error(f"Error processing outbox events: {e}")
+            raise
     
 
     async def astop_worker(self):
-        self.running = False
-        if self.session:
-            await self.session.close()
-        logger.info("Worker stopped")
+        self.running = False        

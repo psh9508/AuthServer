@@ -42,4 +42,3 @@ class OutboxRepository:
         )
         
         await self.session.execute(stmt)
-        await self.session.commit()

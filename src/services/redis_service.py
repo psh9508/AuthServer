@@ -63,7 +63,8 @@ class RedisService:
             key = f'email_verification:{user_id}'
             self.redis_core.set_prefix('email')
             verification_code = await self.redis_core.aget(key)
-            return str(verification_code)
+
+            return None if verification_code is None else str(verification_code)
         except Exception as e:
             raise
 
