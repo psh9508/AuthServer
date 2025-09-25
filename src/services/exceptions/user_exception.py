@@ -9,3 +9,11 @@ class EmailNotVerifiedError(Exception):
 class DuplicateEmailError(Exception):
     # Raised when the email already exists
     pass
+
+class UserAlreadyVerifiedError(Exception):
+    # Raised when the user is already verified
+    pass
+
+class VerificationCodeExpiredError(Exception):
+    # Raised when the verification code has expired
+    pass

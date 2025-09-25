@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from src.factories.redis import get_redis_service
-from src.services.redis_service import RedisService
+from src.services.exceptions.user_exception import *
 from src.routers.models.user import LoginRes
 from src.factories.services import get_auth_service
 from src.services.auth_service import AuthService
@@ -20,5 +19,12 @@ async def refresh_access_token(request: RefreshAccessTokenReq,
 async def user_email_verification(request: EmailVerificationReq,
                                   auth_service: AuthService = Depends(get_auth_service)
     ):
-    return await auth_service.averify_user(request.user_id, request.verification_code)
+    try:
+        return await auth_service.averify_user(request.user_id, request.verification_code)
+    except VerificationCodeExpiredError:
+        return {"error": "verification_code_expired", "action": "request_new_code"}
+    except UserNotFoundError:
+        return {"error": "user_not_found"}
+    except UserAlreadyVerifiedError:
+        return {"error": "user_already_verified"}
 
