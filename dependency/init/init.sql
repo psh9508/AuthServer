@@ -13,8 +13,9 @@ ALTER TABLE users ADD CONSTRAINT uq_users_user_id UNIQUE(user_id);
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-INSERT INTO users (login_id, password, salt, email_verified)
+INSERT INTO users (user_id, login_id, password, salt, email_verified)
 VALUES (
+    'a2d0bf28-e71a-435c-8d9b-2a6564f9dac7',
     'admin@admin.com',
     digest('admin' || 'random_salt', 'sha256'),
     'random_salt',
