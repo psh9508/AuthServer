@@ -23,8 +23,8 @@ class SignupReq(BaseModel):
         return v
     
 class SignupRes(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)    
     
-    id: int
+    user_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
