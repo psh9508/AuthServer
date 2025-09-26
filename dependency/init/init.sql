@@ -9,6 +9,8 @@ CREATE TABLE users (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE users ADD CONSTRAINT uq_users_user_id UNIQUE(user_id);
+
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 INSERT INTO users (login_id, password, salt, email_verified)
