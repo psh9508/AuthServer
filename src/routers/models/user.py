@@ -1,9 +1,11 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, validator
+import uuid
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, validator
 from datetime import datetime
 
 class LoginReq(BaseModel):
-    login_id: str
-    password: str
+    user_id: uuid.UUID = Field(...)
+    login_id: str = Field(...)
+    password: str = Field(...)
 
 class LoginRes(BaseModel):
     access_token: str
