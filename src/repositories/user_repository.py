@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, update 
+from sqlalchemy.exc import IntegrityError
 from src.repositories.schemas.user import User
+from src.services.exceptions.user_exception import DuplicateEmailError
 
 class UserRepository:
     def __init__(self, session: AsyncSession):
@@ -42,6 +44,8 @@ class UserRepository:
 
             result = await self.session.execute(stmt)
             return result.scalar_one_or_none()
+        except IntegrityError as e:
+            raise DuplicateEmailError("User with this email already exists") from e
         except Exception as e:
             raise RuntimeError("Failed to insert user") from e
 

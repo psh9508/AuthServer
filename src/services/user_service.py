@@ -28,11 +28,6 @@ class UserService:
 
 
     async def asignup(self, email: str, password: str) -> User:
-        user = await self.user_repo.aget(email)
-
-        if user:
-            raise DuplicateEmailError("Uasend_email_verificationser with this email already exists")
-
         inserted_user = await self.user_repo.asignup(email, password)
         await self.redis_service.aset_email_verification_code(str(inserted_user.login_id))
         await self.outbox_service.ainsert_email_verification(str(inserted_user.login_id))
