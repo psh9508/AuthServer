@@ -1,3 +1,4 @@
+import uuid
 from pydantic import BaseModel, Field
 
 
@@ -6,5 +7,6 @@ class RefreshAccessTokenReq(BaseModel):
     refresh_token: str = Field(...)
 
 class EmailVerificationReq(BaseModel):
-    user_id: str = Field(...)
+    user_id: uuid.UUID = Field(...)
+    login_id: str = Field(...)    
     verification_code: str = Field(..., pattern=r'^\d{6}$')

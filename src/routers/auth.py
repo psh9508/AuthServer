@@ -20,7 +20,7 @@ async def user_email_verification(request: EmailVerificationReq,
                                   auth_service: AuthService = Depends(get_auth_service)
     ):
     try:
-        return await auth_service.averify_user(request.user_id, request.verification_code)
+        return await auth_service.averify_user(request.user_id, request.login_id, request.verification_code)
     except VerificationCodeExpiredError:
         return {"error": "verification_code_expired", "action": "request_new_code"}
     except UserNotFoundError:

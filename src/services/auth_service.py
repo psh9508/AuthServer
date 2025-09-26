@@ -1,3 +1,4 @@
+import uuid
 from src.repositories.user_repository import UserRepository
 from src.services.redis_service import RedisService
 from src.routers.models.user import LoginRes
@@ -17,16 +18,19 @@ class AuthService:
                         refresh_token=refresh_result['refresh_token'])
     
 
-    async def averify_user(self, user_id: str, verification_code: str) -> bool:
+    async def averify_user(self, user_id: uuid.UUID, email: str, verification_code: str) -> bool:
         user = await self.user_repo.aget(user_id)
 
         if user is None:
             raise UserNotFoundError("User not found")
+        
+        if str(user.login_id) != email:
+            raise UserNotFoundError("User email mismatch")
 
         if bool(user.email_verified):
             raise UserAlreadyVerifiedError("User is already verified")
 
-        stored_verification_code = await self.redis_service.aget_email_verification_code(user_id)
+        stored_verification_code = await self.redis_service.aget_email_verification_code(str(user_id))
 
         if stored_verification_code is None:
             raise VerificationCodeExpiredError("Verification code has expired")
@@ -34,8 +38,8 @@ class AuthService:
         is_verified = stored_verification_code == verification_code
 
         if is_verified:
-            await self._averify_user(user_id)
-            await self.redis_service.adelete_email_verification_code(user_id)
+            await self._averify_user(email)
+            await self.redis_service.adelete_email_verification_code(str(user_id))
 
         return is_verified
 
