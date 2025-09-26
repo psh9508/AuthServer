@@ -1,5 +1,6 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL DEFAULT gen_random_uuid(),
     login_id VARCHAR(255) NOT NULL UNIQUE,
     password BYTEA NOT NULL,
     salt VARCHAR(32) NOT NULL,
