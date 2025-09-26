@@ -27,4 +27,17 @@ async def user_email_verification(request: EmailVerificationReq,
         return {"error": "user_not_found"}
     except UserAlreadyVerifiedError:
         return {"error": "user_already_verified"}
+    
+
+@router.post('/regenerate_verification_code')
+async def regenerate_verification_code(request: RegenerateVerificationCode,
+                                       auth_service: AuthService = Depends(get_auth_service)                                       
+    ):
+    try:
+        await auth_service.aregenerate_verification_code(request.user_id, request.login_id)
+        return {"success": True, "message": "Verification code regenerated"}
+    except UserNotFoundError:
+        return {"error": "user_not_found"}
+    except UserAlreadyVerifiedError:
+        return {"error": "user_already_verified"}
 

@@ -10,3 +10,7 @@ class EmailVerificationReq(BaseModel):
     user_id: uuid.UUID = Field(...)
     login_id: str = Field(...)    
     verification_code: str = Field(..., pattern=r'^\d{6}$')
+
+class RegenerateVerificationCode(BaseModel):
+    user_id: uuid.UUID = Field(...)
+    login_id: str = Field(...)

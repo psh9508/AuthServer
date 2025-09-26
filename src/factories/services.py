@@ -22,6 +22,7 @@ def get_user_service(
 
 
 def get_auth_service(session: AsyncSession = Depends(get_session),
-                     redis_service: RedisService = Depends(get_redis_service)
+                     redis_service: RedisService = Depends(get_redis_service),
+                     user_service: UserService = Depends(get_user_service)
   ) -> AuthService:
-      return AuthService(UserRepository(session), redis_service)
+      return AuthService(UserRepository(session), redis_service, user_service)

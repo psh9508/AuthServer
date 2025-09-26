@@ -30,7 +30,11 @@ class UserService:
 
     async def asignup(self, email: str, password: str) -> User:
         inserted_user = await self.user_repo.asignup(email, password)
-        await self.redis_service.aset_email_verification_code(str(inserted_user.login_id))
-        await self.outbox_service.ainsert_email_verification(str(inserted_user.login_id))
+        await self.aprocess_email_verification_code(str(inserted_user.login_id))
 
         return inserted_user
+    
+    
+    async def aprocess_email_verification_code(self, login_id: str):
+        await self.redis_service.aset_email_verification_code(login_id)
+        await self.outbox_service.ainsert_email_verification(login_id)        
