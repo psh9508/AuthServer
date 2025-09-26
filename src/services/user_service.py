@@ -22,7 +22,7 @@ class UserService:
         elif not bool(user.email_verified):
             raise EmailNotVerifiedError("Email not verified")
         
-        jwt_result = await JwtLogic.acreate_user_jwt(str(user.id))
+        jwt_result = await JwtLogic.acreate_user_jwt(str(user.user_id))
         return LoginRes(access_token=jwt_result['access_token'], 
                         refresh_token=jwt_result['refresh_token'])
 
