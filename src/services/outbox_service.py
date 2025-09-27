@@ -11,13 +11,13 @@ class OutboxService:
     async def ainsert_email_verification(self, email: str):
         try:
             email_verification_message = MessageMaker.make_start_message(EmailVerificationMessage, 
-                                                                        target='email', 
-                                                                        method='verification',
+                                                                        target='auth', 
+                                                                        method='signup',
                                                                         email=email)
             
             return await self.outbox_repo.ainsert(OutboxEvent(
-                service = 'email',
-                event_type = 'email_verification',
+                service = 'auth',
+                event_type = 'signup',
                 payload = email_verification_message.model_dump_json(),
             ))
         except Exception as e:

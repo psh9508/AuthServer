@@ -22,6 +22,7 @@ class RabbitMQClient:
         self.channel = None
         self.is_init = False
         self.exchange_name = get_rabbitmq_config().exchange_name
+        self.server_name = get_rabbitmq_config().server_name
 
 
     async def ainitialize_message_queue(self):
@@ -53,6 +54,11 @@ class RabbitMQClient:
     def on_channel_open(self, channel):
         self.channel = channel
         self.channel.exchange_declare(exchange=self.exchange_name, exchange_type='topic')
+        self.channel.queue_declare(queue=self.server_name)
+        self.channel.queue_bind(exchange=self.exchange_name, 
+                                queue=self.server_name, 
+                                routing_key=f'*.{self.server_name}.*') # {source}.{target}.{method}
+
         self.is_init = True
         self.connected_event.set()
         print("RabbitMQ initialized")
