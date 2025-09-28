@@ -55,7 +55,7 @@ class Worker:
                     from src.data_model.rabbitmq_messages.mq_message import MQMessage
                     mq_message = MQMessage(**payload_dict)
                     
-                    self.rabbitmq_client.send_message(mq_message)
+                    await self.rabbitmq_client.send_message(mq_message)
                     
                     await self.outbox_repo.update_status(
                             event_id=event.id,

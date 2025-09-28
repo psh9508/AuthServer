@@ -16,6 +16,8 @@ class RabbitMQClient:
         self.password = rabbitmq_config['password']
         self.vhost = rabbitmq_config['vhost']
         
+        self.next_seq = 0
+        self.publish_lock = asyncio.Lock()
         self.connected_event = asyncio.Event()
         self.loop = asyncio.get_running_loop()
         self.connection = None
@@ -23,6 +25,7 @@ class RabbitMQClient:
         self.is_init = False
         self.exchange_name = get_rabbitmq_config().exchange_name
         self.server_name = get_rabbitmq_config().server_name
+        self.outstanding = {} 
 
 
     async def ainitialize_message_queue(self):
@@ -53,6 +56,12 @@ class RabbitMQClient:
 
     def on_channel_open(self, channel):
         self.channel = channel
+        self.next_seq = 0
+        self.outstanding.clear()
+
+        self.channel.confirm_delivery(self.on_delivery_confirmation)
+        self.channel.add_on_return_callback(self.on_returned_message)
+
         self.channel.exchange_declare(exchange=self.exchange_name, exchange_type='topic')
         self.channel.queue_declare(queue=self.server_name)
         self.channel.queue_bind(exchange=self.exchange_name, 
@@ -69,11 +78,39 @@ class RabbitMQClient:
         self.is_success = False
         self.connected_event.set()
 
-    def send_message(self, message: MQMessage):
+
+    async def send_message(self, message: MQMessage):
         if not self.channel:
             raise RuntimeError("RabbitMQ channel is not initialized")        
         
         routing_key = f'{message.source}.{message.target}.{message.method}'
-        self.channel.basic_publish(exchange=self.exchange_name, 
-                                   routing_key=routing_key, 
-                                   body=message.model_dump_json())
+
+        async with self.publish_lock:
+            self.next_seq += 1
+            seq = self.next_seq
+            self.outstanding[seq] = message
+
+            self.channel.basic_publish(exchange=self.exchange_name, 
+                                    routing_key=routing_key, 
+                                    body=message.model_dump_json(),
+                                    mandatory=True)
+        
+
+    def on_delivery_confirmation(self, method_frame):
+        method = method_frame.method
+        delivery_tag = method.delivery_tag
+        multiple = getattr(method, "multiple", False)
+        kind = method.NAME.split('.')[-1]  # 'Ack' or 'Nack'
+
+        seqs = [delivery_tag] if not multiple else [k for k in list(self.outstanding.keys()) if k <= delivery_tag]
+
+        for seq in seqs:
+            msg = self.outstanding.pop(seq, None)
+            if kind == 'Ack':
+                print(f"[ACK] seq={seq} (multiple={multiple}) message={msg}")
+            else:
+                print(f"[NACK] seq={seq} (multiple={multiple}) message={msg} -> handle retry/DLQ")
+
+
+    def on_returned_message(self, channel, method, properties, body):
+        print("[RETURNED] unroutable message:", method, body)
