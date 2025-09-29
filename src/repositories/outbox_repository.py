@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import List
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.repositories.schemas.outbox_event import OutboxEvent as OutboxEventSchema
+from src.repositories.schemas.outbox_event import EventStatus, OutboxEvent as OutboxEventSchema
 from src.routers.models.outbox_event import OutboxEvent as OutboxEventModel
 
 class OutboxRepository:
@@ -14,7 +15,7 @@ class OutboxRepository:
             service=outbox.service,
             event_type=outbox.event_type,
             payload=outbox.payload,
-            status=outbox.status or 'PENDING',
+            status=outbox.status or EventStatus.PENDING,
             retry_count=outbox.retry_count or 0,
             last_attempt_at=outbox.last_attempt_at,
             error_message=outbox.error_message
@@ -26,19 +27,20 @@ class OutboxRepository:
 
     async def get_pending_events(self, limit: int = 100) -> List[OutboxEventModel]:
         stmt = select(OutboxEventSchema).where(
-            OutboxEventSchema.status == 'PENDING'
+            OutboxEventSchema.status == EventStatus.PENDING
         ).limit(limit)
         
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
     
 
-    async def update_status(self, event_id: int, status: str, error_message: str | None = None):
+    async def update_status(self, event_id: int, status: str, error_message: str | None = None, sent_at: datetime | None = None):
         stmt = update(OutboxEventSchema).where(
             OutboxEventSchema.id == event_id
         ).values(
             status=status,
-            error_message=error_message
+            error_message=error_message,
+            sent_at = sent_at,
         )
         
         await self.session.execute(stmt)

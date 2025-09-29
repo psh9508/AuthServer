@@ -1,10 +1,16 @@
 from sqlalchemy import (
-    Column, Integer, String, DateTime, Text, func
+    Column, Enum, Integer, String, DateTime, Text, func
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
+import enum
 
 Base = declarative_base()
+
+class EventStatus(enum.Enum):
+    PENDING = "PENDING"
+    SENT = "SENT"
+    FAILED = "FAILED"
 
 class OutboxEvent(Base):
     __tablename__ = "outbox_events"
@@ -13,7 +19,11 @@ class OutboxEvent(Base):
     service = Column(String(100), nullable=False)
     event_type = Column(String(100), nullable=False)
     payload = Column(JSONB, nullable=False)
-    status = Column(String(20), nullable=False, default="PENDING")
+    status = Column(
+        Enum(EventStatus, name='event_status'),
+        nullable=False,
+        default=EventStatus.PENDING
+    )
     retry_count = Column(Integer, nullable=False, default=0)
     last_attempt_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
