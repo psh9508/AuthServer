@@ -16,15 +16,17 @@ class Worker:
         self.running = False
         self.outbox_repo: Optional[OutboxRepository] = None
         self.rabbitmq_client: RabbitMQClient = get_rabbitmq_client()
-   
 
+        self.rabbitmq_client.subscribe_delivery_confirmation(self.handle_delivery_confirmation)
+   
+    
     async def astart_worker(self):
         self.running = True
         logger.info("Worker started")
 
         async for session in get_session():
             self.outbox_repo = OutboxRepository(session)
-
+            
             while self.running:
                 try:
                     await self._aprocess_outbox_events()
@@ -55,15 +57,7 @@ class Worker:
                     from src.data_model.rabbitmq_messages.mq_message import MQMessage
                     mq_message = MQMessage(**payload_dict)
                     
-                    await self.rabbitmq_client.send_message(mq_message)
-                    
-                    await self.outbox_repo.update_status(
-                            event_id=event.id,
-                            status='SENT'
-                        )
-                    
-                    logger.info(f"Successfully sent event {event.id}")
-                    
+                    await self.rabbitmq_client.send_message(mq_message, event.id)
                 except Exception as e:
                     await self.outbox_repo.update_status(
                         event_id=event.id,
@@ -76,7 +70,20 @@ class Worker:
         except Exception as e:
             logger.error(f"Error processing outbox events: {e}")
             raise
-    
 
+
+    async def handle_delivery_confirmation(self, event_data):
+        if not self.outbox_repo:
+            return
+
+        if event_data['type'] == 'ack':
+            await self.outbox_repo.update_status(
+                event_id=event_data['event_id'],
+                status='SENT'
+            )
+            logger.info(f"Successfully sent event {event_data['event_id']}")
+            
+        
     async def astop_worker(self):
-        self.running = False        
+        self.running = False
+        self.rabbitmq_client.unsubscribe_delivery_confirmation(self.handle_delivery_confirmation)

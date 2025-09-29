@@ -25,7 +25,25 @@ class RabbitMQClient:
         self.is_init = False
         self.exchange_name = get_rabbitmq_config().exchange_name
         self.server_name = get_rabbitmq_config().server_name
-        self.outstanding = {} 
+        self.outstanding = {}  # seq: (message, event_id)
+        self.delivery_subscribers = []
+    
+    def subscribe_delivery_confirmation(self, callback):
+        self.delivery_subscribers.append(callback)
+    
+    def unsubscribe_delivery_confirmation(self, callback):
+        if callback in self.delivery_subscribers:
+            self.delivery_subscribers.remove(callback)
+    
+    async def _notify_delivery_confirmation(self, event_data):
+        for callback in self.delivery_subscribers:
+            try:
+                if asyncio.iscoroutinefunction(callback):
+                    await callback(event_data)
+                else:
+                    callback(event_data)
+            except Exception as e:
+                print(f"Error in delivery confirmation callback: {e}") 
 
 
     async def ainitialize_message_queue(self):
@@ -79,7 +97,7 @@ class RabbitMQClient:
         self.connected_event.set()
 
 
-    async def send_message(self, message: MQMessage):
+    async def send_message(self, message: MQMessage, event_id: int | None = None):
         if not self.channel:
             raise RuntimeError("RabbitMQ channel is not initialized")        
         
@@ -88,7 +106,7 @@ class RabbitMQClient:
         async with self.publish_lock:
             self.next_seq += 1
             seq = self.next_seq
-            self.outstanding[seq] = message
+            self.outstanding[seq] = (message, event_id)
 
             self.channel.basic_publish(exchange=self.exchange_name, 
                                     routing_key=routing_key, 
@@ -105,11 +123,21 @@ class RabbitMQClient:
         seqs = [delivery_tag] if not multiple else [k for k in list(self.outstanding.keys()) if k <= delivery_tag]
 
         for seq in seqs:
-            msg = self.outstanding.pop(seq, None)
-            if kind == 'Ack':
-                print(f"[ACK] seq={seq} (multiple={multiple}) message={msg}")
-            else:
-                print(f"[NACK] seq={seq} (multiple={multiple}) message={msg} -> handle retry/DLQ")
+            msg_data = self.outstanding.pop(seq, None)
+            if msg_data:
+                message, event_id = msg_data
+                confirmation_type = 'ack' if kind == 'Ack' else 'nack'
+                
+                if event_id:
+                    asyncio.run_coroutine_threadsafe(
+                        self._notify_delivery_confirmation({
+                            'type': confirmation_type, 
+                            'event_id': event_id,
+                            'message': message,
+                            'seq': seq
+                        }),
+                        self.loop
+                    )
 
 
     def on_returned_message(self, channel, method, properties, body):
