@@ -58,7 +58,7 @@ class AuthService:
         if bool(user.email_verified):
             raise UserAlreadyVerifiedError("User is already verified")
         
-        await self.user_service.aprocess_email_verification_code(str(user.login_id))
+        await self.user_service.aprocess_email_verification_code(str(user.user_id))
 
         return True
 
