@@ -3,7 +3,6 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, va
 from datetime import datetime
 
 class LoginReq(BaseModel):
-    user_id: uuid.UUID = Field(...)
     login_id: str = Field(...)
     password: str = Field(...)
 

@@ -21,7 +21,7 @@ class AuthService:
     
 
     async def averify_user(self, user_id: uuid.UUID, email: str, verification_code: str) -> bool:
-        user = await self.user_repo.aget(user_id)
+        user = await self.user_repo.aget_by_user_id(user_id)
 
         if user is None:
             raise UserNotFoundError("User not found")
@@ -47,7 +47,7 @@ class AuthService:
 
 
     async def aregenerate_verification_code(self, user_id: uuid.UUID, email: str) -> bool:
-        user = await self.user_repo.aget(user_id)
+        user = await self.user_repo.aget_by_user_id(user_id)
 
         if user is None:
             raise UserNotFoundError("User not found")

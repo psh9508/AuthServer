@@ -12,7 +12,7 @@ async def login(request: LoginReq, user_service: UserService = Depends(get_user_
         raise HTTPException(status_code=400, detail="Login_id and password are required")
     
     try:
-        login_res = await user_service.alogin(request.user_id, request.login_id, request.password)
+        login_res = await user_service.alogin(request.login_id, request.password)
         return login_res
     except UserNotFoundError:
         raise HTTPException(status_code=401, detail="Invalid credentials")

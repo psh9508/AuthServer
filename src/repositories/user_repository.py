@@ -9,15 +9,22 @@ class UserRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def aget(self, user_id: uuid.UUID) -> User | None:
+    async def aget_by_user_id(self, user_id: uuid.UUID) -> User | None:
         stmt = select(User).where(User.user_id == user_id)
+        
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+    
+
+    async def aget_by_login_id(self, login_id: str) -> User | None:
+        stmt = select(User).where(User.login_id == login_id)
         
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
         
 
-    async def alogin(self, user_id: uuid.UUID, login_id: str, password: str) -> User | None:
-        user = await self.aget(user_id)
+    async def alogin(self, login_id: str, password: str) -> User | None:
+        user = await self.aget_by_login_id(login_id)
 
         if not user:
             return None

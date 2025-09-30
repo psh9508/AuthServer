@@ -15,8 +15,8 @@ class UserService:
         self.redis_service = redis_service
 
 
-    async def alogin(self, user_id: uuid.UUID, login_id: str, password: str) -> LoginRes:
-        user = await self.user_repo.alogin(user_id, login_id, password)
+    async def alogin(self, login_id: str, password: str) -> LoginRes:
+        user = await self.user_repo.alogin(login_id, password)
         
         if not user:
             raise UserNotFoundError("Invalid credentials")
