@@ -32,7 +32,7 @@ class AuthService:
         if bool(user.email_verified):
             raise UserAlreadyVerifiedError("User is already verified")
 
-        stored_verification_code = await self.redis_service.aget_email_verification_code(str(user_id))
+        stored_verification_code = await self.redis_service.aget_email_verification_code(str(user.login_id))
 
         if stored_verification_code is None:
             raise VerificationCodeExpiredError("Verification code has expired")
@@ -41,7 +41,7 @@ class AuthService:
 
         if is_verified:
             await self._averify_user(email)
-            await self.redis_service.adelete_email_verification_code(str(user_id))
+            await self.redis_service.adelete_email_verification_code(str(user.login_id))
 
         return is_verified
 
@@ -58,7 +58,7 @@ class AuthService:
         if bool(user.email_verified):
             raise UserAlreadyVerifiedError("User is already verified")
         
-        await self.user_service.aprocess_email_verification_code(str(user.user_id))
+        await self.user_service.aprocess_email_verification_code(str(user.login_id))
 
         return True
 
