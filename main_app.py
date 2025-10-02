@@ -1,6 +1,7 @@
 import asyncio
 import asyncpg
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import asynccontextmanager
 from config.config import load_config
 from src.core.worker import Worker
@@ -34,6 +35,15 @@ async def lifespan(_: FastAPI):
 
 def get_main_app():
     app = FastAPI(lifespan=lifespan)
+    
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
     app.add_middleware(HttpMiddleware)
     return app
 
