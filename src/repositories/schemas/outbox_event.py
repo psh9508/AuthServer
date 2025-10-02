@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Enum, Integer, String, DateTime, Text, func
+    Column, Integer, String, DateTime, Text, func
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
@@ -20,9 +20,9 @@ class OutboxEvent(Base):
     event_type = Column(String(100), nullable=False)
     payload = Column(JSONB, nullable=False)
     status = Column(
-        Enum(EventStatus, name='event_status'),
+        String(20),
         nullable=False,
-        default=EventStatus.PENDING
+        default=EventStatus.PENDING.value
     )
     retry_count = Column(Integer, nullable=False, default=0)
     last_attempt_at = Column(DateTime, nullable=True)

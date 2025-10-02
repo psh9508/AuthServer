@@ -1,9 +1,14 @@
 from datetime import datetime
-from typing import List
+from typing import List, NotRequired, TypedDict, Unpack
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.repositories.schemas.outbox_event import EventStatus, OutboxEvent as OutboxEventSchema
 from src.routers.models.outbox_event import OutboxEvent as OutboxEventModel
+
+class StatusUpdateData(TypedDict):
+    status: str
+    error_message: NotRequired[str | None]
+    sent_at: NotRequired[datetime | None]
 
 class OutboxRepository:
     def __init__(self, session: AsyncSession):
@@ -15,7 +20,7 @@ class OutboxRepository:
             service=outbox.service,
             event_type=outbox.event_type,
             payload=outbox.payload,
-            status=outbox.status or EventStatus.PENDING,
+            status=outbox.status or EventStatus.PENDING.value,
             retry_count=outbox.retry_count or 0,
             last_attempt_at=outbox.last_attempt_at,
             error_message=outbox.error_message
@@ -25,22 +30,19 @@ class OutboxRepository:
         return result.inserted_primary_key
     
 
-    async def get_pending_events(self, limit: int = 100) -> List[OutboxEventModel]:
-        stmt = select(OutboxEventSchema).where(
-            OutboxEventSchema.status == EventStatus.PENDING
-        ).limit(limit)
+    async def get_processable_events(self, limit: int = 100) -> List[OutboxEventModel]:
+        stmt = select(OutboxEventSchema).where(OutboxEventSchema.status.in_([
+                EventStatus.PENDING.value,
+                EventStatus.FAILED.value
+            ])).limit(limit)
         
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
     
 
-    async def update_status(self, event_id: int, status: str, error_message: str | None = None, sent_at: datetime | None = None):
+    async def update_status(self, event_id: int, **updates: Unpack[StatusUpdateData]):
         stmt = update(OutboxEventSchema).where(
             OutboxEventSchema.id == event_id
-        ).values(
-            status=status,
-            error_message=error_message,
-            sent_at = sent_at,
-        )
+        ).values(**updates)
         
         await self.session.execute(stmt)
