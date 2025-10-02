@@ -1,14 +1,22 @@
 import uuid
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, validator
 from datetime import datetime
+from typing import Union
 
 class LoginReq(BaseModel):
     login_id: str = Field(...)
     password: str = Field(...)
 
-class LoginRes(BaseModel):
-    access_token: str
-    refresh_token: str
+class LoginSuccessRes(BaseModel):
+    access_token: str = Field(...)
+    refresh_token: str = Field(...)
+
+class EmailVerificationRequiredRes(BaseModel):
+    requires_email_verification: bool = True
+    user_id: str = Field(...)
+    message: str = "Email verification required"
+
+LoginRes = Union[LoginSuccessRes, EmailVerificationRequiredRes]
 
 class SignupReq(BaseModel):
     email: EmailStr

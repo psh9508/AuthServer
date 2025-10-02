@@ -1,5 +1,5 @@
 import uuid
-from src.routers.models.user import LoginRes
+from src.routers.models.user import LoginRes, LoginSuccessRes, EmailVerificationRequiredRes
 from src.services.redis_service import RedisService
 from src.services.outbox_service import OutboxService
 from src.services.exceptions.user_exception import *
@@ -21,11 +21,13 @@ class UserService:
         if not user:
             raise UserNotFoundError("Invalid credentials")
         elif not bool(user.email_verified):
-            raise EmailNotVerifiedError("Email not verified")
+            raise EmailNotVerifiedError(user_id= str(user.user_id))
         
         jwt_result = await JwtLogic.acreate_user_jwt(str(user.user_id))
-        return LoginRes(access_token=jwt_result['access_token'], 
-                        refresh_token=jwt_result['refresh_token'])
+        return LoginSuccessRes(
+            access_token=jwt_result['access_token'], 
+            refresh_token=jwt_result['refresh_token'],
+        )
 
 
     async def asignup(self, email: str, password: str) -> User:
@@ -37,4 +39,4 @@ class UserService:
     
     async def aprocess_email_verification_code(self, login_id: str):
         await self.redis_service.aset_email_verification_code(login_id)
-        await self.outbox_service.ainsert_email_verification(login_id)        
+        await self.outbox_service.ainsert_email_verification(login_id)

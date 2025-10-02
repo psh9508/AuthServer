@@ -1,6 +1,6 @@
 import uuid
 from src.repositories.user_repository import UserRepository
-from src.routers.models.user import LoginRes
+from src.routers.models.user import LoginRes, LoginSuccessRes
 from src.core.jwt_logic import JwtLogic
 from src.services.redis_service import RedisService
 from src.services.user_service import UserService
@@ -16,19 +16,16 @@ class AuthService:
 
     async def arefresh_access_token(self, access_token: str, refresh_token: str) -> LoginRes:
         refresh_result = await JwtLogic.arefresh_access_token(access_token, refresh_token)
-        return LoginRes(access_token=refresh_result['access_token'],
-                        refresh_token=refresh_result['refresh_token'])
+        return LoginSuccessRes(access_token=refresh_result['access_token'],
+                                refresh_token=refresh_result['refresh_token'])
     
 
     async def averify_user(self, user_id: uuid.UUID, email: str, verification_code: str) -> bool:
         user = await self.user_repo.aget_by_user_id(user_id)
 
-        if user is None:
+        if user is None or str(user.login_id) != email:
             raise UserNotFoundError("User not found")
         
-        if str(user.login_id) != email:
-            raise UserNotFoundError("User email mismatch")
-
         if bool(user.email_verified):
             raise UserAlreadyVerifiedError("User is already verified")
 

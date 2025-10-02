@@ -16,8 +16,8 @@ async def login(request: LoginReq, user_service: UserService = Depends(get_user_
         return login_res
     except UserNotFoundError:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    except EmailNotVerifiedError:
-        raise HTTPException(status_code=403, detail="Email not verified")
+    except EmailNotVerifiedError as ee:
+        raise HTTPException(status_code=403, detail={"user_id": ee.user_id})
 
 
 @router.post('/signup')

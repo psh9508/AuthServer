@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from src.services.exceptions.user_exception import *
 from src.routers.models.user import LoginRes
@@ -20,13 +20,18 @@ async def user_email_verification(request: EmailVerificationReq,
                                   auth_service: AuthService = Depends(get_auth_service)
     ):
     try:
-        return await auth_service.averify_user(request.user_id, request.login_id, request.verification_code)
+        is_success = await auth_service.averify_user(request.user_id, request.login_id, request.verification_code)
+
+        if is_success:
+            return {"success": True, "message": "User verified successfully"}
+        else:
+            raise HTTPException(status_code=400, detail={"error": "invalid_verification_code"})
     except VerificationCodeExpiredError:
-        return {"error": "verification_code_expired", "action": "request_new_code"}
+        raise HTTPException(status_code=400, detail={"error": "verification_code_expired", "action": "request_new_code"})
     except UserNotFoundError:
-        return {"error": "user_not_found"}
+        raise HTTPException(status_code=404, detail={"error": "user_not_found"})
     except UserAlreadyVerifiedError:
-        return {"error": "user_already_verified"}
+        raise HTTPException(status_code=409, detail={"error": "user_already_verified"})
     
 
 @router.post('/regenerate_verification_code')
@@ -37,7 +42,7 @@ async def regenerate_verification_code(request: RegenerateVerificationCode,
         await auth_service.aregenerate_verification_code(request.user_id, request.login_id)
         return {"success": True, "message": "Verification code regenerated"}
     except UserNotFoundError:
-        return {"error": "user_not_found"}
+        raise HTTPException(status_code=404, detail={"error": "user_not_found"})
     except UserAlreadyVerifiedError:
-        return {"error": "user_already_verified"}
+        raise HTTPException(status_code=409, detail={"error": "user_already_verified"})
 
