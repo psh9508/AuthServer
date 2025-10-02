@@ -88,7 +88,6 @@ class RabbitMQClient:
 
         self.is_init = True
         self.connected_event.set()
-        print("RabbitMQ initialized")
 
 
     def on_connection_open_error(self, _, exception):
