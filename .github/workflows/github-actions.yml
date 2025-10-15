@@ -19,6 +19,6 @@ jobs:
     - name: Build
       run: |        
         pip install uv
-        pip add pylint
+        uv add pylint
         uv build
         uv run pylint .
