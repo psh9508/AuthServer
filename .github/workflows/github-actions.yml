@@ -16,7 +16,9 @@ jobs:
         python-version-file: .python-version
     - name: Check Python syntax
       run: find . -name "*.py" | xargs python -m py_compile
-    - name: Install dependencies
+    - name: Build
       run: |        
         pip install uv
+        pip add pylint
         uv build
+        uv run pylint .
