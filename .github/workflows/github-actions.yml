@@ -2,12 +2,12 @@ name: Python package
 
 on:
   push:
-    branches: [ "release/dev" ]
+    branches: [ "release/dev", "release/live" ]
     
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ github.ref == 'refs/heads/release/live' && 'live' || 'dev' }}
     
     steps:
     - uses: actions/checkout@v4
