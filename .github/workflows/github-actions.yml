@@ -38,7 +38,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker buildx build -t $ECR_URI:latest -t $ECR_URI:$FINAL_TAG .
+        docker buildx build -t $ECR_URI:latest -t $ECR_URI:$IMAGE_TAG .
 
     - name: Push Docker image to ECR
       run: |
