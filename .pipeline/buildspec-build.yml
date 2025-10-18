@@ -5,6 +5,8 @@ phases:
     commands:
       - set -e
       - echo Logging in to Amazon ECR...
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - echo "AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}"
       - aws ecr get-login-password --region ${ECR_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$ECR_REGION.amazonaws.com
       - export IMAGE_TAG="$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -c 1-8)"
   build:
