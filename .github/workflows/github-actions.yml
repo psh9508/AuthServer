@@ -28,10 +28,11 @@ jobs:
       id: ecr_vars
       run: |
         AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+        PROJECT_NAME=$(basename $GITHUB_REPOSITORY)
         ECR_REPO_NAME=${{vars.ECR_REPO_NAME}}
         REGION=ap-northeast-2
         IMAGE_TAG=${GITHUB_SHA::8}
-        ECR_URI="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME"
+        ECR_URI="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:$PROJECT_NAME"
         echo "ECR_URI=$ECR_URI" >> $GITHUB_ENV
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
