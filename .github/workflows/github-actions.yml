@@ -5,17 +5,12 @@ on:
     branches: [ "release/dev", "release/live" ]
     
 jobs:
-  build:
+  build_and_push:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/release/live' && 'live' || 'dev' }}
     
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version-file: .python-version
 
     - name: Set AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
