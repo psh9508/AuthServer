@@ -19,7 +19,7 @@ phases:
       - echo Pushing the Docker image...
       - docker push --all-tags "$IMAGE_URL"
       - echo Writing imagedefinitions.json...
-      - printf '[{"name":"%s","imageUri":"%s"}]' "authserver" "$IMAGE_URL:$latest" > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "AuthServer" "$IMAGE_URL:$latest" > imagedefinitions.json
 
 artifacts:
   files:
