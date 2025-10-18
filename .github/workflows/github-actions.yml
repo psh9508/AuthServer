@@ -39,4 +39,11 @@ jobs:
     - name: Build
       run: |
         docker buildx build -t ${ECR_URI}:latest -t ${ECR_URI}:${IMAGE_TAG} --push .
-        
+
+    - name: Create imagedefinitions.json
+      run: |
+        echo '[{"name":"authserver","imageUri":"'"${{ env.ECR_URI }}:latest"'"}]' > imagedefinitions.json
+
+    - name: Upload imagedefinitions.json to S3 (for CodePipeline)
+      run: |
+        aws s3 cp imagedefinitions.json s3://root-mimir-cicd/final_test/SourceArti/imagedefinitions.json
