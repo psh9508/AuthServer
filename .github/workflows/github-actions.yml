@@ -44,5 +44,5 @@ jobs:
 
     - name: Build
       run: |
-        docker buildx build --push -t $ECR_URI:$IMAGE_TAG .
+        docker buildx build --push -t $ECR_URI-$IMAGE_TAG .
 
