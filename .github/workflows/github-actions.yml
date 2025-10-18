@@ -32,7 +32,7 @@ jobs:
     environment: ${{ github.ref == 'refs/heads/release/live' && 'live' || 'dev' }}
     
     steps:
-    # - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     # - name: Set up Python
     #   uses: actions/setup-python@v5
