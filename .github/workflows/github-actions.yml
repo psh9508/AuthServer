@@ -5,39 +5,17 @@ on:
     branches: [ "release/dev", "release/live" ]
     
 jobs:
-  # init:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     ECR_URI: ${{ steps.set_vars.outputs.ECR_URI }}
-  #     IMAGE_TAG: ${{ steps.set_vars.outputs.IMAGE_TAG }}
-  #   steps:
-  #     # - name: Checkout
-  #     #   uses: actions/checkout@v3
-
-  #     - name: Set variables
-  #       id: set_vars
-  #       run: |
-  #         AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-  #         REPO_NAME=$(basename $GITHUB_REPOSITORY)
-  #         ECR_REPO_NAME=${{vars.ECR_REPO_NAME}}
-  #         REGION=ap-northeast-2
-  #         IMAGE_TAG=${GITHUB_SHA::8}
-  #         ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO_NAME}:${PROJECT_NAME}"
-
-  #         echo "ECR_URI=${ECR_URI}" >> $GITHUB_OUTPUT
-  #         echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-
   build:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/release/live' && 'live' || 'dev' }}
     
     steps:
-    # - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    # - name: Set up Python
-    #   uses: actions/setup-python@v5
-    #   with:
-    #     python-version-file: .python-version
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: .python-version
 
     - name: Set AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -50,13 +28,13 @@ jobs:
       id: ecr_vars
       run: |
         AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-        PROJECT_NAME=$(basename "$GITHUB_REPOSITORY")
+        PROJECT_NAME=$(basename $GITHUB_REPOSITORY)
         ECR_REPO_NAME=${{vars.ECR_REPO_NAME}}
         REGION=ap-northeast-2
         IMAGE_TAG=${GITHUB_SHA::8}
-        ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO_NAME}:${PROJECT_NAME}"
-        echo "ECR_URI=${ECR_URI}" >> $GITHUB_ENV
-        echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+        ECR_URI="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO_NAME:$PROJECT_NAME"
+        echo "ECR_URI=$ECR_URI" >> $GITHUB_ENV
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
@@ -66,5 +44,5 @@ jobs:
 
     - name: Build
       run: |
-        docker buildx build --push -t ${ECR_URI}-${IMAGE_TAG} .
+        docker buildx build --push -t $ECR_URI-$IMAGE_TAG .
 
