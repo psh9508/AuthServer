@@ -5,7 +5,7 @@ on:
     branches: [ "release/dev", "release/live" ]
 
 jobs:
-  build_and_upload:
+  upload_source_files:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/release/live' && 'live' || 'dev' }}
     steps:
