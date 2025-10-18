@@ -36,11 +36,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
+    - name: Build
       run: |
-        docker buildx build -t $ECR_URI:latest -t $ECR_URI:$IMAGE_TAG .
-
-    - name: Push Docker image to ECR
-      run: |
-        docker push --all-tags $ECR_URI
-
+        docker buildx build -t $ECR_URI:latest -t $ECR_URI:$IMAGE_TAG --push .
+        
