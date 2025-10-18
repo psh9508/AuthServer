@@ -39,3 +39,4 @@ jobs:
     - name: Build
       run: |
         docker buildx build -t ${ECR_URI}:latest -t ${ECR_URI}:${IMAGE_TAG} --push .
+        
