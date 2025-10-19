@@ -12,14 +12,15 @@ phases:
     commands:
       - echo Building the Docker image...
       - IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${ECR_REGION}.amazonaws.com/${ECR_REPO_NAME}"
-      - docker build -t "${IMAGE_URL}:${IMAGE_TAG}" -t "${IMAGE_URL}:latest" .
+      - DOCKER_URL="${IMAGE_URL}:${IMAGE_TAG}"
+      - docker build -t ${DOCKER_URL} .
   post_build:
     commands:
       - set -e
       - echo Pushing the Docker image...
-      - docker push --all-tags "$IMAGE_URL"
+      - docker push ${DOCKER_URL}
       - echo Writing imagedefinitions.json...
-      - printf '[{"name":"%s","imageUri":"%s"}]' "AuthServer" "$IMAGE_URL:$latest" > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "AuthServer" "${IMAGE_URL}:${IMAGE_TAG}" > imagedefinitions.json
 
 artifacts:
   files:
