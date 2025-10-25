@@ -26,4 +26,4 @@ class MessageQueueService:
                                                                     target='email', 
                                                                     method='verification',
                                                                     email=email)
-        self.core.send_message(email_verification_message)
+        await self.core.send_message(email_verification_message)
