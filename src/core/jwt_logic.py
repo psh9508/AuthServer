@@ -3,6 +3,7 @@ from typing import Union
 import jwt
 
 from src.factories.redis import get_redis_service
+from src.constants.jwt_constants import REFRESH_TOKEN_EXPIRE
 
 class JwtLogic:
     SECRET_KEY: str
@@ -15,7 +16,6 @@ class JwtLogic:
         cls.SECRET_KEY = config['jwt']['secret']
         cls.REFRESH_KEY = config['jwt']['refresh_secret']
         cls.is_initialized = True
-        cls.refresh_token_expire = timedelta(weeks=1)
 
     @classmethod
     async def adecode_access_token(cls, token: str) -> dict | None:
@@ -36,10 +36,7 @@ class JwtLogic:
         
         access_token = cls._get_access_token_jwt(id, expire_seconds)
         refresh_token = cls._get_refresh_token_jwt(id)
-
-        redis_service = get_redis_service()
-        await redis_service.arefresh_refresh_token(id, refresh_token, int(cls.refresh_token_expire.total_seconds()))
-
+        
         return {
             'access_token': access_token,
             'refresh_token': refresh_token,
@@ -92,5 +89,5 @@ class JwtLogic:
 
     @classmethod
     def _get_refresh_token_jwt(cls, id: str):
-        return cls._get_jwt(cls.REFRESH_KEY, id, int(cls.refresh_token_expire.total_seconds()))
+        return cls._get_jwt(cls.REFRESH_KEY, id, int(REFRESH_TOKEN_EXPIRE.total_seconds()))
     
