@@ -5,20 +5,28 @@ phases:
     commands:
       - set -e
       - echo Logging in to Amazon ECR...
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - aws ecr get-login-password --region ${ECR_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$ECR_REGION.amazonaws.com
-      - export IMAGE_TAG="$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -c 1-8)"
+      - IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${ECR_REGION}.amazonaws.com/${ECR_REPO_NAME}"
+      - |
+        if [ -z "$CODEBUILD_RESOLVED_SOURCE_VERSION" ]; then
+          IMAGE_TAG=$(head /dev/urandom | tr -dc a-z0-9 | head -c 8)
+        else
+          IMAGE_TAG="$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -c 1-8)"
+        fi
+      - export DOCKER_URL="${IMAGE_URL}:${IMAGE_TAG}"
   build:
     commands:
-      - echo Building the Docker image...
-      - IMAGE_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${ECR_REGION}.amazonaws.com/${ECR_REPO_NAME}"
-      - docker build -t "${IMAGE_URL}:${IMAGE_TAG}" -t "${IMAGE_URL}:latest" .
+      - echo Building the Docker image...      
+      - docker build -t ${DOCKER_URL} .
   post_build:
     commands:
       - set -e
       - echo Pushing the Docker image...
-      - docker push --all-tags "$IMAGE_URL"
-      # - echo Writing image definitions file...
-      # - echo "export IMAGE_URL=$IMAGE_URL" > build-output.sh
+      - docker push ${DOCKER_URL}
+      - echo Writing imagedefinitions.json...
+      - printf '[{"name":"%s","imageUri":"%s"}]' "${GIT_PROJECT_NAME}" "${DOCKER_URL}" > imagedefinitions.json
 
 artifacts:
   files:
+    - imagedefinitions.json
