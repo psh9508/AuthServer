@@ -15,7 +15,6 @@ def load_config():
         has_dotenv = load_dotenv() 
 
         if not has_dotenv:
-            print(".env file not found or could not be loaded.")
             raise FileNotFoundError(".env file not found or could not be loaded.")
 
         environment = os.environ.get('ENV')
