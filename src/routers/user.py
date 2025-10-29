@@ -29,5 +29,4 @@ async def signup(request: SignupReq, user_service: UserService = Depends(get_use
         inserted_user = await user_service.asignup(request.email, request.password)
         return SignupRes.model_validate(inserted_user)
     except DuplicateEmailError:
-        raise HTTPException(status_code=409, detail="User with this email already exists")
-        
+        raise HTTPException(status_code=409, detail="User with this email already exists")       

@@ -5,24 +5,25 @@ from src.data_model.mq_config import MQConfig
 _config = None
 _mq_config: MQConfig
 
-def load_config(environment: str = 'local'):
+def load_config():
     import yaml
     global _config
     global _mq_config
 
     if _config is None:
+        from dotenv import load_dotenv
+        has_dotenv = load_dotenv() 
+
+        if not has_dotenv:
+            raise FileNotFoundError(".env file not found or could not be loaded.")
+
+        environment = os.environ.get('ENV')
         config_file_path = f'./config/config_{environment}.yml'
         if not os.path.exists(config_file_path):
             raise FileNotFoundError(f"Configuration file not found: {config_file_path}")
         with open(config_file_path, 'r', encoding='utf-8') as f:
             _config = yaml.safe_load(f)
-        
-        from dotenv import load_dotenv
-        has_dotenv = load_dotenv() 
-
-        if not has_dotenv:
-            print(".env file not found or could not be loaded.")
-
+       
         _replace_env_values(_config)
 
     if not _config['server_name'] or not _config['exchange_name']:

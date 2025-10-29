@@ -6,6 +6,7 @@ from src.services.exceptions.user_exception import *
 from src.repositories.schemas.user import User
 from src.core.jwt_logic import JwtLogic
 from src.repositories.user_repository import UserRepository
+from src.constants.jwt_constants import REFRESH_TOKEN_EXPIRE
 
 
 class UserService:
@@ -24,6 +25,13 @@ class UserService:
             raise EmailNotVerifiedError(user_id= str(user.user_id))
         
         jwt_result = await JwtLogic.acreate_user_jwt(str(user.user_id))
+
+        await self.redis_service.arefresh_refresh_token(
+            str(user.user_id), 
+            jwt_result['refresh_token'], 
+            int(REFRESH_TOKEN_EXPIRE.total_seconds())
+        )
+
         return LoginSuccessRes(
             access_token=jwt_result['access_token'], 
             refresh_token=jwt_result['refresh_token'],
