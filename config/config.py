@@ -11,13 +11,13 @@ def load_config():
     global _mq_config
 
     if _config is None:
-        from dotenv import load_dotenv
-        has_dotenv = load_dotenv() 
+        from dotenv import load_dotenv        
+        load_dotenv()
+        environment = os.environ.get('ENV', '')
 
-        if not has_dotenv:
+        if environment == '':
             raise FileNotFoundError(".env file not found or could not be loaded.")
-
-        environment = os.environ.get('ENV')
+        
         config_file_path = f'./config/config_{environment}.yml'
         if not os.path.exists(config_file_path):
             raise FileNotFoundError(f"Configuration file not found: {config_file_path}")
