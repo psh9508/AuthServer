@@ -21,6 +21,6 @@ exchange_name: my_exchange.topic
 #   password: ENV_RABBITMQ_PASSWORD
 #   vhost: my_vhost
   
-# jwt:
-#   secret: ENV_JWT_SECRET
-#   refresh_secret: ENV_JWT_REFRESH_SECRET
+jwt:
+  secret: ENV_JWT_SECRET
+  refresh_secret: ENV_JWT_REFRESH_SECRET

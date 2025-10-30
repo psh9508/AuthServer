@@ -31,7 +31,7 @@ def load_config():
     if not _config['jwt']['refresh_secret'] or not _config['jwt']['secret']:
         raise ValueError("Missing required configuration values: 'refresh_secret' or 'secret'")
 
-    _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
+    # _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
     return _config
 
 
