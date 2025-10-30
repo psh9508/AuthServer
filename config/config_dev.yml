@@ -1,5 +1,5 @@
-# server_name: auth
-# exchange_name: my_exchange.topic
+server_name: auth
+exchange_name: my_exchange.topic
 
 # db:
 #   redis:
