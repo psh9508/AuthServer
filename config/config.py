@@ -16,7 +16,7 @@ def load_config():
         environment = os.environ.get('ENV', '')
 
         if environment == '':
-            raise FileNotFoundError(".env file not found or could not be loaded.")
+            raise ValueError("ENV environment variable not set.")
         
         config_file_path = f'./config/config_{environment}.yml'
         if not os.path.exists(config_file_path):
@@ -26,8 +26,8 @@ def load_config():
        
         _replace_env_values(_config)
 
-    if not _config['server_name'] or not _config['exchange_name']:
-        raise ValueError("Missing required configuration values: 'server_name' or 'exchange_name'")
+    # if not _config['server_name'] or not _config['exchange_name']:
+    #     raise ValueError("Missing required configuration values: 'server_name' or 'exchange_name'")
     if not _config['jwt']['refresh_secret'] or not _config['jwt']['secret']:
         raise ValueError("Missing required configuration values: 'refresh_secret' or 'secret'")
 

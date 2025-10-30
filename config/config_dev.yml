@@ -1,26 +1,26 @@
-server_name: auth
-exchange_name: my_exchange.topic
+# server_name: auth
+# exchange_name: my_exchange.topic
 
-db:
-  redis:
-    host: localhost
-    port: 63791
-    db: 0
-    prefix: 'auth'
-  postgres:
-    host: auth-server.cxowigk2a8k5.ap-northeast-2.rds.amazonaws.com
-    user: postgres
-    port: 5432
-    # database: ''
-    password: ENV_DB_PASSWORD
+# db:
+#   redis:
+#     host: localhost
+#     port: 63791
+#     db: 0
+#     prefix: 'auth'
+#   postgres:
+#     host: auth-server.cxowigk2a8k5.ap-northeast-2.rds.amazonaws.com
+#     user: postgres
+#     port: 5432
+#     # database: ''
+#     password: ENV_DB_PASSWORD
 
-rabbitmq:
-  host: localhost
-  port: 5672
-  user: user
-  password: ENV_RABBITMQ_PASSWORD
-  vhost: my_vhost
+# rabbitmq:
+#   host: localhost
+#   port: 5672
+#   user: user
+#   password: ENV_RABBITMQ_PASSWORD
+#   vhost: my_vhost
   
-jwt:
-  secret: ENV_JWT_SECRET
-  refresh_secret: ENV_JWT_REFRESH_SECRET
+# jwt:
+#   secret: ENV_JWT_SECRET
+#   refresh_secret: ENV_JWT_REFRESH_SECRET
