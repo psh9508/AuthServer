@@ -17,20 +17,20 @@ async def lifespan(_: FastAPI):
     config = load_config()
     JwtLogic.initialize(config)
     print("Loaded configuration...")
-    await initializeDependencies(config)
-    print("Loaded Dependencies...")
-    await MessageQueueService.ainitialize_rabbitmq(config)
-    print("Initialized RabbitMQ client...")
-    init_db_session()
+    # await initializeDependencies(config)
+    # print("Loaded Dependencies...")
+    # await MessageQueueService.ainitialize_rabbitmq(config)
+    # print("Initialized RabbitMQ client...")
+    # init_db_session()
     print("Initialized DB session...")
-    worker = Worker()
-    asyncio.create_task(worker.astart_worker())
-    print("The worker has been started...")
+    # worker = Worker()
+    # asyncio.create_task(worker.astart_worker())
+    # print("The worker has been started...")
     yield
     
-    print("Shutting down...")
-    await worker.astop_worker()
-    print("The worker has been shut down...")
+    # print("Shutting down...")
+    # await worker.astop_worker()
+    # print("The worker has been shut down...")
 
 
 def get_main_app():
@@ -49,7 +49,7 @@ def get_main_app():
 
     
 async def initializeDependencies(config):
-    await ainitialize_redis(config)
+    # await ainitialize_redis(config)
     await aconnect_to_db(config)
     
 
