@@ -11,7 +11,7 @@ db:
     host: mimir-auth-db.cxowigk2a8k5.ap-northeast-2.rds.amazonaws.com
     user: postgres
     port: 5432
-    # database: ''
+    database: 'postgres'
     password: ENV_DB_PASSWORD
 
 # rabbitmq:
