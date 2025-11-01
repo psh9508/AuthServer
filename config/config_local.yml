@@ -13,6 +13,7 @@ db:
     port: 54321
     database: auth_db
     password: ENV_DB_PASSWORD
+    ssl_path: 'ssl/ap-northeast-2-bundle.pem'
 
 rabbitmq:
   host: localhost

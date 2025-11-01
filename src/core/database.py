@@ -17,9 +17,18 @@ def init_db_session():
         f"@{db_config['host']}:{db_config.get('port', 5432)}/{db_config['database']}"
     )
     
+    import ssl
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = True
+    ssl_context.verify_mode = ssl.CERT_REQUIRED
+    ssl_context.load_verify_locations(db_config['ssl_path'])
+    
     async_engine = create_async_engine(
         DATABASE_URL,
         echo=True,
+        connect_args={
+            "ssl": ssl_context
+        }
     )
     
     async_session = async_sessionmaker(

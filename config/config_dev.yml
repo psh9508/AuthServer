@@ -13,6 +13,7 @@ db:
     port: 5432
     database: 'postgres'
     password: ENV_DB_PASSWORD
+    ssl_path: 'ssl/ap-northeast-2-bundle.pem'
 
 # rabbitmq:
 #   host: localhost
