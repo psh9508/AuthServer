@@ -24,6 +24,7 @@ def load_config():
         with open(config_file_path, 'r', encoding='utf-8') as f:
             _config = yaml.safe_load(f)
        
+        print(f"Loaded config keys: {list(_config.keys()) if _config else 'None'}")
         _replace_env_values(_config)
 
     # if not _config['server_name'] or not _config['exchange_name']:
