@@ -32,6 +32,7 @@ def load_config():
         raise ValueError("Missing required configuration values: 'refresh_secret' or 'secret'")
 
     # _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
+    print(f"_config contents: {_config}")
     return _config
 
 
