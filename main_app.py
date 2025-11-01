@@ -21,7 +21,7 @@ async def lifespan(_: FastAPI):
     # print("Loaded Dependencies...")
     # await MessageQueueService.ainitialize_rabbitmq(config)
     # print("Initialized RabbitMQ client...")
-    # init_db_session()
+    init_db_session()
     print("Initialized DB session...")
     # worker = Worker()
     # asyncio.create_task(worker.astart_worker())
