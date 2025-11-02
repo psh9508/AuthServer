@@ -17,8 +17,8 @@ async def lifespan(_: FastAPI):
     config = load_config()
     JwtLogic.initialize(config)
     print("Loaded configuration...")
-    # await initializeDependencies(config)
-    # print("Loaded Dependencies...")
+    await initializeDependencies(config)
+    print("Loaded Dependencies...")
     # await MessageQueueService.ainitialize_rabbitmq(config)
     # print("Initialized RabbitMQ client...")
     init_db_session()
@@ -49,7 +49,7 @@ def get_main_app():
 
     
 async def initializeDependencies(config):
-    # await ainitialize_redis(config)
+    await ainitialize_redis(config)
     await aconnect_to_db(config)
     
 
