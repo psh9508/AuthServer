@@ -2,18 +2,18 @@ server_name: auth
 # exchange_name: my_exchange.topic
 
 db:
-  # redis:
-  #   host: localhost
-  #   port: 63791
-  #   db: 0
-  #   prefix: 'auth'
+  redis:
+    host: clustercfg.mimir-cache.micqoi.apn2.cache.amazonaws.com
+    port: 6379
+    db: 0
+    prefix: 'auth'
   postgres:
     host: mimir-auth-db.cxowigk2a8k5.ap-northeast-2.rds.amazonaws.com
     user: postgres
     port: 5432
-    database: 'postgres'
+    database: postgres
     password: ENV_DB_PASSWORD
-    ssl_path: 'ssl/ap-northeast-2-bundle.pem'
+    ssl_path: ssl/ap-northeast-2-bundle.pem
 
 # rabbitmq:
 #   host: localhost
