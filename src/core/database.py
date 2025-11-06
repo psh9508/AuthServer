@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from config.config import get_config
 from typing import Optional
 import ssl
-import os
 
 async_engine: Optional[AsyncEngine] = None
 async_session: Optional[async_sessionmaker[AsyncSession]] = None
