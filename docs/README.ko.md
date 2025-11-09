@@ -23,3 +23,13 @@
     ``` bash
     uv run main.py
     ```
+
+
+
+## CI/CD
+
+<img src="https://github.com/user-attachments/assets/3eac1b98-1265-454b-9463-1e1a15681cce" />
+
+### 자세히
+
+CI/CD에 대한 자세한 설명을 원하시는 사람이 있다면 [클릭해서 자세히 보기](https://github.com/psh9508/AuthServer/wiki/CICD).
