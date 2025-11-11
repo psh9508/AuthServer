@@ -33,3 +33,15 @@
 ### 자세히
 
 CI/CD에 대한 자세한 설명을 원하시는 사람이 있다면 [클릭해서 자세히 보기](https://github.com/psh9508/AuthServer/wiki/CICD).
+
+### 요약
+
+1. **'release/'** 로 시작하는 브랜치에 코드가 푸시되면, `GitHub Actions`를 통해 모든 소스 코드를 `S3`에 업로드한다.
+
+2. 특정 버킷에 **'source.zip'** 파일이 생성되면 `EventBridge`가 트리거되어 `CodePipeline`이 실행된다. `CodePipeline`은 순차적으로 `CodeBuild`와 `CodeDeploy`를 실행한다.
+
+3. `CodeBuild`는 **source.zip** 파일을 열어 Docker 이미지를 생성한다.
+
+4. 생성된 이미지를 `ECR`에 업로드한다.
+
+5. `CodeBuild`가 끝나면 `CodePipeline`은 `CodeDeploy`를 실행하여 Docker 이미지를 `ECS`에 배포한다. 이때 `CodeBuild`에서 생성된 아티팩트를 사용하며, 그 안에는 배포할 이미지에 대한 정보가 포함되어 있다.
