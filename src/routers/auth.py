@@ -36,7 +36,7 @@ async def user_email_verification(request: EmailVerificationReq,
 
 @router.post('/regenerate_verification_code')
 async def regenerate_verification_code(request: RegenerateVerificationCode,
-                                       auth_service: AuthService = Depends(get_auth_service)                                       
+                                       auth_service: AuthService = Depends(get_auth_service)
     ):
     try:
         await auth_service.aregenerate_verification_code(request.user_id, request.login_id)
@@ -45,4 +45,3 @@ async def regenerate_verification_code(request: RegenerateVerificationCode,
         raise HTTPException(status_code=404, detail={"error": "user_not_found"})
     except UserAlreadyVerifiedError:
         raise HTTPException(status_code=409, detail={"error": "user_already_verified"})
-
