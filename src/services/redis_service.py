@@ -77,3 +77,22 @@ class RedisService:
         except Exception as e:
             # logic is going when it has exception
             pass 
+
+
+    async def aget_login_attempts(self, email: str) -> int:
+        try:
+            key = f'login_attempts:{email}'
+            self.redis_core.set_prefix('auth')
+            attempts = await self.redis_core.aget(key)
+            return int(attempts) if attempts is not None else 0
+        except Exception as e:
+            raise
+            
+
+    async def aset_login_attempts(self, email: str, attempts: int, ttl: int):
+        try:
+            key = f'login_attempts:{email}'
+            self.redis_core.set_prefix('auth')
+            await self.redis_core.aset(key, str(attempts), ttl)
+        except Exception as e:
+            raise
