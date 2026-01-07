@@ -75,7 +75,7 @@ class RedisService:
             self.redis_core.set_prefix('email')
             await self.redis_core.adelete(key)
         except Exception as e:
-            # logic is going when it has exception
+            # Keep going even if there is an exception.
             pass 
 
 
