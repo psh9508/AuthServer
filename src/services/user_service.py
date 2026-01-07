@@ -17,6 +17,10 @@ class UserService:
 
 
     async def alogin(self, login_id: str, password: str) -> LoginRes:
+        # Before starting, get the login attempts for this email from Redis.
+        # If login fails, increase and save the attempts, and return the count too.
+        # For login failure, handle it in try/except, and re-raise inside except.
+
         user = await self.user_repo.alogin(login_id, password)
         
         if not user:
@@ -31,6 +35,8 @@ class UserService:
             jwt_result['refresh_token'], 
             int(REFRESH_TOKEN_EXPIRE.total_seconds())
         )
+
+        # On login success, delete the login attempts count.
 
         return LoginSuccessRes(
             access_token=jwt_result['access_token'], 
