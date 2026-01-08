@@ -27,7 +27,6 @@ class UserService:
         user = await self.user_repo.alogin(login_id, password)
         
         if not user:
-            await self.redis_service.aadd_login_attempts_count(login_id, attempt_count + 1, ttl=15*60)
             raise UserNotFoundError("Invalid credentials")
         elif not bool(user.email_verified):
             raise EmailNotVerifiedError(user_id= str(user.user_id))
