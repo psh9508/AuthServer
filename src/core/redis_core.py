@@ -131,6 +131,15 @@ class RedisCore:
         except Exception as e:
             print(f"Redis TTL error: {e}")
             return -2
+        
+    async def aincr(self, key: str, amount: int = 1) -> int:
+        try:
+            client = await self.aget_client()
+            prefixed_key = self._append_prefix(key)
+            return await client.incr(prefixed_key, amount)
+        except Exception as e:
+            print(f"Redis INCR error: {e}")
+            return -1
 
 
 _redis_client = RedisCore()
