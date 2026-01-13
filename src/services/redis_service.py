@@ -89,10 +89,24 @@ class RedisService:
             raise
             
 
-    async def aset_login_attempts(self, email: str, attempts: int, ttl: int):
+    async def aadd_login_attempts_count(self, email: str):
+        TTL = 15 * 60  # 15 minutes
+
         try:
             key = f'login_attempts:{email}'
             self.redis_core.set_prefix('auth')
-            await self.redis_core.aset(key, str(attempts), ttl)
+            final_key = self.redis_core._append_prefix(key)
+
+            pipe = await self.redis_core.aget_pipe()
+
+            async with pipe as p:
+                p.incr(final_key)
+                p.expire(final_key, TTL)
+
+                results = await p.execute()
+            
+            return results[0]
         except Exception as e:
             raise
+
+    

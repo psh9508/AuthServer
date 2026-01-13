@@ -17,17 +17,11 @@ class UserService:
 
 
     async def alogin(self, login_id: str, password: str) -> LoginRes:
-        # Before starting, get the login attempts for this email from Redis.
-        attempt_count = await self.redis_service.aget_login_attempts(login_id)
-        
-        # If login fails, increase and save the attempts, and return the count too.
-
-        # For login failure, handle it in try/except, and re-raise inside except.
-
         user = await self.user_repo.alogin(login_id, password)
         
         if not user:
-            raise UserNotFoundError("Invalid credentials")
+            attemps_count = await self.redis_service.aadd_login_attempts_count(login_id)
+            raise UserNotFoundError(login_attempts=attemps_count)
         elif not bool(user.email_verified):
             raise EmailNotVerifiedError(user_id= str(user.user_id))
         

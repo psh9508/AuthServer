@@ -140,6 +140,14 @@ class RedisCore:
         except Exception as e:
             print(f"Redis INCR error: {e}")
             return -1
+        
+    async def aget_pipe(self):
+        try:
+            client = await self.aget_client()
+            return client.pipeline()
+        except Exception as e:
+            print(f"Redis PIPE error: {e}")
+            raise
 
 
 _redis_client = RedisCore()

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 
 
+@dataclass
 class UserNotFoundError(Exception):
     # Raised when the user cannot be found
+    login_attempts: int = 0
     pass
 
 @dataclass
