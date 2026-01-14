@@ -21,7 +21,7 @@ class UserService:
         
         if not user:
             attemps_count = await self.redis_service.aadd_login_attempts_count(login_id)
-            raise UserNotFoundError(login_attempts=attemps_count)
+            raise InvalidCredentialsError(login_attempts=attemps_count)
         elif not bool(user.email_verified):
             raise EmailNotVerifiedError(user_id= str(user.user_id))
         

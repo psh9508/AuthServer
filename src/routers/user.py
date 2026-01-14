@@ -14,7 +14,7 @@ async def login(request: LoginReq, user_service: UserService = Depends(get_user_
     try:
         login_res = await user_service.alogin(request.login_id, request.password)
         return login_res
-    except UserNotFoundError:
+    except InvalidCredentialsError:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     except EmailNotVerifiedError as ee:
         raise HTTPException(status_code=403, detail={"user_id": ee.user_id})

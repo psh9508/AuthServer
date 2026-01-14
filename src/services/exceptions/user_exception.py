@@ -1,9 +1,13 @@
 from dataclasses import dataclass
 
 
-@dataclass
 class UserNotFoundError(Exception):
     # Raised when the user cannot be found
+    pass
+
+@dataclass
+class InvalidCredentialsError(Exception):
+    # Raised when the credentials are invalid
     login_attempts: int = 0
     pass
 
