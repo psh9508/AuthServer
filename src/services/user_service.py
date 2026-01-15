@@ -33,7 +33,7 @@ class UserService:
             int(REFRESH_TOKEN_EXPIRE.total_seconds())
         )
 
-        # On login success, delete the login attempts count.
+        await self.redis_service.adelete_login_attempts_count(login_id)
 
         return LoginSuccessRes(
             access_token=jwt_result['access_token'], 

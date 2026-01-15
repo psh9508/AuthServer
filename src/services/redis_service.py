@@ -3,7 +3,7 @@ import secrets
 
 class RedisService:
     def __init__(self, redis_core: RedisCore):
-        self.redis_core = redis_core
+        self.redis_core = redis_core        
     
     # async def get(self, key: str) -> Optional[Any]:
     #     return await self.redis_core.aget(key)
@@ -81,7 +81,7 @@ class RedisService:
 
     async def aget_login_attempts(self, email: str) -> int:
         try:
-            key = f'login_attempts:{email}'
+            key = self._get_login_attempts_key(email)
             self.redis_core.set_prefix('auth')
             attempts = await self.redis_core.aget(key)
             return int(attempts) if attempts is not None else 0
@@ -93,7 +93,7 @@ class RedisService:
         TTL = 15 * 60  # 15 minutes
 
         try:
-            key = f'login_attempts:{email}'
+            key = self._get_login_attempts_key(email)
             self.redis_core.set_prefix('auth')
             final_key = self.redis_core._append_prefix(key)
 
@@ -108,5 +108,19 @@ class RedisService:
             return results[0]
         except Exception as e:
             raise
+
+    async def adelete_login_attempts_count(self, email: str):
+        try:
+            key = self._get_login_attempts_key(email)
+            self.redis_core.set_prefix('auth')
+            await self.redis_core.adelete(key)
+        except Exception as e:
+            # Keep going even if there is an exception.
+            pass
+
+
+    def _get_login_attempts_key(self, email: str) -> str:
+        LOGIN_ATTEMPT_COUNT_KEY_PREFIX = "login_attempts"
+        return f'{LOGIN_ATTEMPT_COUNT_KEY_PREFIX}:{email}'
 
     
