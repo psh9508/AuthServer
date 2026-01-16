@@ -1,4 +1,4 @@
-import uuid
+import asyncio
 from src.routers.models.user import LoginRes, LoginSuccessRes, EmailVerificationRequiredRes
 from src.services.redis_service import RedisService
 from src.services.outbox_service import OutboxService
@@ -24,6 +24,8 @@ class UserService:
             raise InvalidCredentialsError(login_attempts=attemps_count)
         elif not bool(user.email_verified):
             raise EmailNotVerifiedError(user_id= str(user.user_id))
+
+        asyncio.create_task(self.redis_service.adelete_login_attempts_count(login_id))        
         
         jwt_result = await JwtLogic.acreate_user_jwt(str(user.user_id))
 
@@ -32,8 +34,6 @@ class UserService:
             jwt_result['refresh_token'], 
             int(REFRESH_TOKEN_EXPIRE.total_seconds())
         )
-
-        await self.redis_service.adelete_login_attempts_count(login_id)
 
         return LoginSuccessRes(
             access_token=jwt_result['access_token'], 
