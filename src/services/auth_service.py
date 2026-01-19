@@ -24,10 +24,10 @@ class AuthService:
         user = await self.user_repo.aget_by_user_id(user_id)
 
         if user is None or str(user.login_id) != email:
-            raise UserNotFoundError("User not found")
+            raise UserNotFoundError()
         
         if bool(user.email_verified):
-            raise UserAlreadyVerifiedError("User is already verified")
+            raise UserAlreadyVerifiedError()
 
         stored_verification_code = await self.redis_service.aget_email_verification_code(str(user.login_id))
 
@@ -47,13 +47,13 @@ class AuthService:
         user = await self.user_repo.aget_by_user_id(user_id)
 
         if user is None:
-            raise UserNotFoundError("User not found")
+            raise UserNotFoundError()
         
         if str(user.login_id) != email:
-            raise UserNotFoundError("User email mismatch")
+            raise UserNotFoundError()
         
         if bool(user.email_verified):
-            raise UserAlreadyVerifiedError("User is already verified")
+            raise UserAlreadyVerifiedError()
         
         await self.user_service.aprocess_email_verification_code(str(user.login_id))
 

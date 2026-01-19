@@ -53,7 +53,7 @@ class UserRepository:
             result = await self.session.execute(stmt)
             return result.scalar_one_or_none()
         except IntegrityError as e:
-            raise DuplicateEmailError("User with this email already exists") from e
+            raise DuplicateEmailError() from e
         except Exception as e:
             raise RuntimeError("Failed to insert user") from e
 
