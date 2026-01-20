@@ -27,5 +27,16 @@ async def global_exception_handler(_: Request, exc: AppBaseError):
         }
     )
 
+@app.exception_handler(Exception)
+async def general_exception_handler(_: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "code": "INTERNAL_SERVER_ERROR",
+            "message": "An unexpected error occurred.",
+            "data": None
+        }
+    )
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
