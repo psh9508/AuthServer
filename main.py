@@ -1,6 +1,7 @@
 from dataclasses import asdict
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import uvicorn
 import main_app
 from src.services.exceptions.user_exception import AppBaseError
@@ -24,6 +25,17 @@ async def global_exception_handler(_: Request, exc: AppBaseError):
             "code": exc.code,
             "message": exc.message,
             "data": error_data
+        }
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(_: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "code": "HTTP_ERROR",
+            "message": "",
+            "data": exc.detail,
         }
     )
 
