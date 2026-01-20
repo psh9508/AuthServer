@@ -1,4 +1,5 @@
 import uuid
+from src.routers.models.auth import RegenerateVerificationCodeRes
 from src.repositories.user_repository import UserRepository
 from src.routers.models.user import LoginRes, LoginSuccessRes
 from src.core.jwt_logic import JwtLogic
@@ -32,7 +33,7 @@ class AuthService:
         stored_verification_code = await self.redis_service.aget_email_verification_code(str(user.login_id))
 
         if stored_verification_code is None:
-            raise VerificationCodeExpiredError("Verification code has expired")
+            raise VerificationCodeExpiredError()
 
         is_verified = stored_verification_code == verification_code
 
@@ -43,7 +44,7 @@ class AuthService:
         return is_verified
 
 
-    async def aregenerate_verification_code(self, user_id: uuid.UUID, email: str) -> bool:
+    async def aregenerate_verification_code(self, user_id: uuid.UUID, email: str) -> RegenerateVerificationCodeRes:
         user = await self.user_repo.aget_by_user_id(user_id)
 
         if user is None:
@@ -57,7 +58,7 @@ class AuthService:
         
         await self.user_service.aprocess_email_verification_code(str(user.login_id))
 
-        return True
+        return RegenerateVerificationCodeRes()
 
 
     async def _averify_user(self, email: str):
