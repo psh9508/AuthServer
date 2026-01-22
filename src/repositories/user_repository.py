@@ -29,7 +29,7 @@ class UserRepository:
         if not user:
             return None
         
-        hashed_password = self._get_hased_password(password, str(user.salt))
+        hashed_password = self._get_hashed_password(password, str(user.salt))
         stmt = select(User).where(
             User.login_id == login_id,
             User.password == hashed_password,
@@ -42,7 +42,7 @@ class UserRepository:
         try:
             import secrets
             salt =  secrets.token_hex(16)
-            hashed_password = self._get_hased_password(password, salt)
+            hashed_password = self._get_hashed_password(password, salt)
             
             stmt = insert(User).values(
                 login_id = email,
@@ -71,6 +71,6 @@ class UserRepository:
             raise RuntimeError("Failed to update email_verified") from e
 
 
-    def _get_hased_password(self, password: str, salt: str):
+    def _get_hashed_password(self, password: str, salt: str):
         import hashlib
         return hashlib.sha256(password.encode() + salt.encode()).digest()

@@ -1,6 +1,6 @@
 
-from src.routers.models.base_response_model import BaseResonseData
+from src.routers.models.base_response_model import BaseResponseData
 
 
-class HealthCheckRes(BaseResonseData):
+class HealthCheckRes(BaseResponseData):
     pass

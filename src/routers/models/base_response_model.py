@@ -3,10 +3,10 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import Generic, TypeVar
 from pydantic import BaseModel, ConfigDict
 
-class BaseResonseData(BaseModel):
+class BaseResponseData(BaseModel):
     message: str = Field(default="", exclude=True)
 
-DataT = TypeVar('DataT', bound=BaseResonseData)
+DataT = TypeVar('DataT', bound=BaseResponseData)
 
 class BaseResponseModel(BaseModel, Generic[DataT]):
     code: str = "SUCCESS"
