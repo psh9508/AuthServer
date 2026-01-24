@@ -2,6 +2,7 @@ from dataclasses import asdict
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from prometheus_client import make_asgi_app
 import uvicorn
 import main_app
 from src.services.exceptions.user_exception import AppBaseError
@@ -10,6 +11,7 @@ from src.routers.base import router as base_router
 from src.routers.auth import router as auth_router
 
 app = main_app.get_main_app()
+app.mount("/metrics", make_asgi_app())
 
 app.include_router(user_router)
 app.include_router(base_router)
