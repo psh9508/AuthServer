@@ -4,12 +4,14 @@ from src.factories.services import get_user_service
 from src.services.user_service import UserService
 from src.routers.models.user import *
 from src.routers.models.base_response_model import BaseResponseModel
+from src.core.metrics import record_login_failure
 
 router = APIRouter(prefix="/user", tags=["user"])
 
 @router.post("/login")
 async def login(request: LoginReq, user_service: UserService = Depends(get_user_service)) -> BaseResponseModel:
     if not request.login_id or not request.password:
+        record_login_failure('invalid_request')
         raise HTTPException(status_code=400, detail="Login_id and password are required")
     
     login_res = await user_service.alogin(request.login_id, request.password)
