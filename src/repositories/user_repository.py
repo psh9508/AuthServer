@@ -30,13 +30,12 @@ class UserRepository:
             return None
         
         hashed_password = self._get_hashed_password(password, str(user.salt))
-        stmt = select(User).where(
-            User.login_id == login_id,
-            User.password == hashed_password,
-        )
+
+        if hashed_password != user.password:
+            return None
         
-        result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
+        return user
+
     
     async def asignup(self, email:str, password: str) -> User:
         try:
