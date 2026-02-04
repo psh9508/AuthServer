@@ -1,5 +1,7 @@
 import asyncio
 import time
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.routers.models.user import LoginRes, LoginSuccessRes, EmailVerificationRequiredRes
 from src.services.redis_service import RedisService
 from src.services.outbox_service import OutboxService
@@ -12,9 +14,9 @@ from src.core.metrics import login_duration, record_login_success, record_login_
 
 
 class UserService:
-    def __init__(self, user_repo: UserRepository, outbox_service: OutboxService, redis_service: RedisService):
-        self.user_repo = user_repo
-        self.outbox_service = outbox_service
+    def __init__(self, session: AsyncSession, redis_service: RedisService):
+        self.user_repo = UserRepository(session)
+        self.outbox_service = OutboxService(session)
         self.redis_service = redis_service
 
 
