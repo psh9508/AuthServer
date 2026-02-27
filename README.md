@@ -25,7 +25,7 @@ When it gets a login request, it verifies the login information and returns a `J
 2. run this project
 
     ``` bash
-    uv run main.py
+    uv run opentelemetry-instrument uvicorn main:app --host 0.0.0.0 --port 8000
     ```
 
 

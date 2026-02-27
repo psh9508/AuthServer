@@ -1,4 +1,7 @@
+version: "3.8"
+
 services:
+  # Core services
   postgres:
     image: postgres:15
     container_name: my_postgres
@@ -26,8 +29,8 @@ services:
     image: rabbitmq:3.12-management
     container_name: my_rabbitmq
     ports:
-      - "5672:5672"      # AMQP port
-      - "15672:15672"    # Management UI
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: ${ENV_RABBITMQ_PASSWORD}
@@ -35,30 +38,100 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  prometheus:
-      image: prom/prometheus:latest
-      container_name: prometheus
-      volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml 
-        - prometheus_data:/prometheus
-      ports:
-        - "9090:9090"
+  # Monitoring
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    environment:
+      - ENV=${ENV:-local}
+    volumes:
+      - ../config/otel-collector-config_local.yml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8888:8888" # Prometheus metrics
+      - "8889:8889" # Prometheus exporter
+    depends_on:
+      - victoriametrics
+      - victorialogs
+      - jaeger
+    networks:
+      - otel-network
+    restart: unless-stopped
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.96.0
+    container_name: victoriametrics
+    command:
+      - "-storageDataPath=/victoria-metrics-data"
+      - "-httpListenAddr=:8428"
+      - "-retentionPeriod=30d"
+    volumes:
+      - victoriametrics-data:/victoria-metrics-data
+    ports:
+      - "8428:8428" # HTTP API & UI
+    networks:
+      - otel-network
+    restart: unless-stopped
+
+  victorialogs:
+    image: victoriametrics/victoria-logs:v1.3.2-victorialogs
+    container_name: victorialogs
+    command:
+      - "-storageDataPath=/victoria-logs-data"
+      - "-httpListenAddr=:9428"
+      - "-retentionPeriod=30d"
+    volumes:
+      - victorialogs-data:/victoria-logs-data
+    ports:
+      - "9428:9428" # HTTP API
+    networks:
+      - otel-network
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14250:14250" # gRPC (model.proto)
+    networks:
+      - otel-network
+    restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.4.0
     container_name: grafana
-    ports:
-      - "3001:3000"
     environment:
+      - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_INSTALL_PLUGINS=https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v0.24.0/victoriametrics-logs-datasource-v0.24.0.zip;victoriametrics-logs-datasource
     volumes:
-        - grafana_data:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3010:3000"
     depends_on:
-      - prometheus
+      - victoriametrics
+      - victorialogs
+      - jaeger
+    networks:
+      - otel-network
+    restart: unless-stopped
+
+networks:
+  otel-network:
+    driver: bridge
 
 volumes:
   rabbitmq_data:
   postgres_data:
   redis_data:
-  prometheus_data:
-  grafana_data:
+  victoriametrics-data:
+  victorialogs-data:
+  grafana-data:

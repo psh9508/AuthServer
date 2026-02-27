@@ -18,4 +18,4 @@ RUN test -f pyproject.toml || (echo "pyproject file is missing. Stopping the bui
 RUN pip install uv
 RUN uv run --frozen python --version
 
-CMD ["uv", "run", "--frozen", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "--frozen", "opentelemetry-instrument", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
