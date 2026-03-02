@@ -1,16 +1,16 @@
 
 import asyncio
-import logging
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.rabbitmq_client import RabbitMQClient
 from src.core.database import get_session
+from src.core.logger import get_logger
 from src.repositories.outbox_repository import OutboxRepository
 from src.repositories.schemas.outbox_event import EventStatus
 from src.services.message_queue_service import get_rabbitmq_client
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class Worker:
     def __init__(self):

@@ -4,8 +4,11 @@ import pika
 from pika.adapters.asyncio_connection import AsyncioConnection
 
 from config.config import get_rabbitmq_config
+from src.core.logger import get_logger
 from src.data_model.mq_config import MQConfig
 from src.data_model.rabbitmq_messages.mq_message import MQMessage
+
+logger = get_logger(__name__)
 
 class RabbitMQClient:    
     def __init__(self, config):
@@ -43,7 +46,7 @@ class RabbitMQClient:
                 else:
                     callback(event_data)
             except Exception as e:
-                print(f"Error in delivery confirmation callback: {e}") 
+                logger.exception("Error in delivery confirmation callback: %s", e)
 
 
     async def ainitialize_message_queue(self):
@@ -91,7 +94,7 @@ class RabbitMQClient:
 
 
     def on_connection_open_error(self, _, exception):
-        print(f"[Error] RabbitMQ connection failed: {exception}")
+        logger.error("[Error] RabbitMQ connection failed: %s", exception)
         self.is_success = False
         self.connected_event.set()
 
@@ -140,4 +143,4 @@ class RabbitMQClient:
 
 
     def on_returned_message(self, channel, method, properties, body):
-        print("[RETURNED] unroutable message:", method, body)
+        logger.warning("[RETURNED] unroutable message: method=%s body=%s", method, body)

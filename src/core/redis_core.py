@@ -2,6 +2,9 @@ import json
 import redis.asyncio as redis
 from typing import Any, Optional
 from config.config import get_config
+from src.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 class RedisCore:
     def __init__(self):
@@ -54,7 +57,7 @@ class RedisCore:
             except json.JSONDecodeError:
                 return value
         except Exception as e:
-            print(f"Redis GET error: {e}")
+            logger.exception("Redis GET error: %s", e)
             return None
     
     async def aset(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
@@ -70,7 +73,7 @@ class RedisCore:
             else:
                 return await client.set(prefixed_key, value)
         except Exception as e:
-            print(f"Redis SET error: {e}")
+            logger.exception("Redis SET error: %s", e)
             return False
 
     async def aclean_up(self, key: str, batch_size: int = 10) -> bool:
@@ -89,7 +92,7 @@ class RedisCore:
                     
             return deleted_count > 0
         except Exception as e:
-            print(f"Redis SAFE DELETE USER KEYS error: {e}")
+            logger.exception("Redis SAFE DELETE USER KEYS error: %s", e)
             return False
         
     async def adelete(self, key: str) -> bool:
@@ -102,7 +105,7 @@ class RedisCore:
             result = await client.delete(prefixed_key)
             return result > 0
         except Exception as e:
-            print(f"Redis DELETE error: {e}")
+            logger.exception("Redis DELETE error: %s", e)
             return False
         
     async def aexists(self, key: str) -> bool:
@@ -111,7 +114,7 @@ class RedisCore:
             prefixed_key = self._append_prefix(key)
             return await client.exists(prefixed_key) > 0
         except Exception as e:
-            print(f"Redis EXISTS error: {e}")
+            logger.exception("Redis EXISTS error: %s", e)
             return False
     
     async def aexpire(self, key: str, ttl: int) -> bool:
@@ -120,7 +123,7 @@ class RedisCore:
             prefixed_key = self._append_prefix(key)
             return await client.expire(prefixed_key, ttl)
         except Exception as e:
-            print(f"Redis EXPIRE error: {e}")
+            logger.exception("Redis EXPIRE error: %s", e)
             return False
     
     async def attl(self, key: str) -> int:
@@ -129,7 +132,7 @@ class RedisCore:
             prefixed_key = self._append_prefix(key)
             return await client.ttl(prefixed_key)
         except Exception as e:
-            print(f"Redis TTL error: {e}")
+            logger.exception("Redis TTL error: %s", e)
             return -2
         
     async def aincr(self, key: str, amount: int = 1) -> int:
@@ -138,7 +141,7 @@ class RedisCore:
             prefixed_key = self._append_prefix(key)
             return await client.incr(prefixed_key, amount)
         except Exception as e:
-            print(f"Redis INCR error: {e}")
+            logger.exception("Redis INCR error: %s", e)
             return -1
         
     async def aget_pipe(self):
@@ -146,7 +149,7 @@ class RedisCore:
             client = await self.aget_client()
             return client.pipeline()
         except Exception as e:
-            print(f"Redis PIPE error: {e}")
+            logger.exception("Redis PIPE error: %s", e)
             raise
 
 

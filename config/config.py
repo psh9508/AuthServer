@@ -1,14 +1,17 @@
 import os
 
+from src.data_model.logger_config import LoggerConfig
 from src.data_model.mq_config import MQConfig
 
 _config = None
-_mq_config: MQConfig
+_mq_config: MQConfig | None = None
+_logger_config: LoggerConfig | None = None
 
 def load_config():
     import yaml
     global _config
     global _mq_config
+    global _logger_config
 
     if _config is None:
         from dotenv import load_dotenv        
@@ -32,6 +35,8 @@ def load_config():
         raise ValueError("Missing required configuration values: 'refresh_secret' or 'secret'")
 
     _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
+    logger_config_dict = _config.get('logger', {})
+    _logger_config = LoggerConfig(level=logger_config_dict.get('level', 'INFO'))
     # print(f"_config contents: {_config}")
     return _config
 
@@ -46,6 +51,12 @@ def get_rabbitmq_config() -> MQConfig:
     if _mq_config is None:
         raise RuntimeError("RabbitMQ config is not set properly.")
     return _mq_config
+
+
+def get_logger_config() -> LoggerConfig:
+    if _logger_config is None:
+        raise RuntimeError("Logger config is not set properly.")
+    return _logger_config
 
 
 def _replace_env_values(config):

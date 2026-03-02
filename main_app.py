@@ -10,27 +10,30 @@ from src.middleware.http_middleware import HttpMiddleware
 from src.core.jwt_logic import JwtLogic
 from src.core.database import init_db_session
 from src.core.redis_core import ainitialize_redis
+from src.core.logger import get_logger
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    print("Starting up...")
+    logger = get_logger(__name__)
+    logger.info("Starting up...")
     config = load_config()
+    logger = get_logger(__name__)
     JwtLogic.initialize(config)
-    print("Loaded configuration...")
+    logger.info("Loaded configuration...")
     await initializeDependencies(config)
-    print("Loaded Dependencies...")
+    logger.info("Loaded Dependencies...")
     # await MessageQueueService.ainitialize_rabbitmq(config)
-    # print("Initialized RabbitMQ client...")
+    # logger.info("Initialized RabbitMQ client...")
     init_db_session()
-    print("Initialized DB session...")
+    logger.info("Initialized DB session...")
     # worker = Worker()
     # asyncio.create_task(worker.astart_worker())
-    # print("The worker has been started...")
+    # logger.info("The worker has been started...")
     yield
     
-    # print("Shutting down...")
+    # logger.info("Shutting down...")
     # await worker.astop_worker()
-    # print("The worker has been shut down...")
+    # logger.info("The worker has been shut down...")
 
 
 def get_main_app():
@@ -54,6 +57,7 @@ async def initializeDependencies(config):
     
 
 async def aconnect_to_db(config):
+    logger = get_logger(__name__)
     global db_pool
     db_config = config['db']['postgres']
     user = db_config['user']
@@ -70,7 +74,7 @@ async def aconnect_to_db(config):
             port=port,
             database=database
         )
-        print("Connected to PostgreSQL")
+        logger.info("Connected to PostgreSQL")
     except Exception as e:
-        print(f"Failed to connect to PostgreSQL: {e}")
+        logger.exception("Failed to connect to PostgreSQL: %s", e)
         raise e

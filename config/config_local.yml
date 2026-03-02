@@ -25,3 +25,6 @@ rabbitmq:
 jwt:
   secret: ENV_JWT_SECRET
   refresh_secret: ENV_JWT_REFRESH_SECRET
+
+logger:
+  level: DEBUG 
