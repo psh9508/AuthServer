@@ -50,4 +50,7 @@ If someone wants to know more about this [click here to see details](https://git
 
 5. When `CodeBuild` ends, `CodePipeline` starts to run `CodeDeploy`, which deploys the `Docker image` to `ECS`. It uses an artifact created by `CodeBuild`, which contains the information about the image to be deployed.
 
----
+
+## Observability
+
+<img src="https://github.com/user-attachments/assets/389ffe3a-1478-429c-b5c6-e73b5a526161" />
