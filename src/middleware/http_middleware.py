@@ -7,9 +7,13 @@ from src.core.jwt_logic import JwtLogic
 
 open_apis: list[str] = [
     '/docs',
+    '/docs/',
+    '/docs/oauth2-redirect',
     '/healthcheck', 
     '/metrics',
     '/metrics/',
+    '/openapi.json',
+    '/redoc',
     '/user/login',
     '/user/signup',
     '/auth/user_verification',
