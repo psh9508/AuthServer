@@ -1,7 +1,6 @@
-from typing import Generic, TypeVar, Optional
-from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import Generic, TypeVar
-from pydantic import BaseModel, ConfigDict
+
+from pydantic import BaseModel, Field, model_validator
 
 class BaseResponseData(BaseModel):
     message: str = Field(default="", exclude=True)
@@ -15,6 +14,5 @@ class BaseResponseModel(BaseModel, Generic[DataT]):
 
     @model_validator(mode="after")
     def set_message(self):
-        if self.data and hasattr(self.data, 'message'):
-            self.message = self.data.message
+        self.message = self.data.message
         return self

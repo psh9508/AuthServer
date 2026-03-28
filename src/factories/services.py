@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.factories.redis import get_redis_service
 from src.core.database import get_session
 from src.repositories.user_repository import UserRepository
+from src.services.auth_service import AuthService
 from src.services.redis_service import RedisService
-from src.services import UserService, AuthService
+from src.services.user_service import UserService
 
 
 def get_user_service(

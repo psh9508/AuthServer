@@ -9,6 +9,7 @@ from src.services.exceptions.user_exception import AppBaseError
 from src.routers.user import router as user_router
 from src.routers.base import router as base_router
 from src.routers.auth import router as auth_router
+from src.routers.source_control import router as source_control_router
 
 app = main_app.get_main_app()
 app.mount("/metrics", make_asgi_app())
@@ -16,6 +17,7 @@ app.mount("/metrics", make_asgi_app())
 app.include_router(user_router)
 app.include_router(base_router)
 app.include_router(auth_router)
+app.include_router(source_control_router)
 
 @app.exception_handler(AppBaseError)
 async def global_exception_handler(_: Request, exc: AppBaseError):

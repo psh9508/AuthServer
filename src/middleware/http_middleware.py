@@ -17,7 +17,7 @@ open_apis: list[str] = [
     '/user/login',
     '/user/signup',
     '/auth/user_verification',
-    '/auth/regenerate_verification_code'
+    '/auth/regenerate_verification_code',
 ]
 
 class HttpMiddleware(BaseHTTPMiddleware):

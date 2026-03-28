@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Literal, Union
 import jwt
 
 from src.factories.redis import get_redis_service
@@ -8,7 +8,8 @@ from src.constants.jwt_constants import REFRESH_TOKEN_EXPIRE
 class JwtLogic:
     SECRET_KEY: str
     REFRESH_KEY: str
-    ALGORITHM: str = "HS256"
+    AUTHSERVER_ALGORITHM: str = "HS256"
+    GITHUB_APP_ALGORITHM: str = "RS256"
     is_initialized = False
 
     @classmethod
@@ -20,7 +21,7 @@ class JwtLogic:
     @classmethod
     async def adecode_access_token(cls, token: str) -> dict | None:
         try:
-            return jwt.decode(token, cls.SECRET_KEY, [cls.ALGORITHM])
+            return jwt.decode(token, cls.SECRET_KEY, [cls.AUTHSERVER_ALGORITHM])
         except Exception:
             # Expired or tampered token
             return None
@@ -48,12 +49,12 @@ class JwtLogic:
             raise ValueError("Access token and refresh token are required")
         
         try:
-            user_info = jwt.decode(access_token, cls.SECRET_KEY, algorithms=[cls.ALGORITHM], options={"verify_exp": False})
+            user_info = jwt.decode(access_token, cls.SECRET_KEY, algorithms=[cls.AUTHSERVER_ALGORITHM], options={"verify_exp": False})
         except jwt.InvalidTokenError:
             raise ValueError("Invalid access token format")
         
         try:
-            refresh_payload = jwt.decode(refresh_token, cls.REFRESH_KEY, algorithms=[cls.ALGORITHM])
+            refresh_payload = jwt.decode(refresh_token, cls.REFRESH_KEY, algorithms=[cls.AUTHSERVER_ALGORITHM])
         except jwt.ExpiredSignatureError:
             raise ValueError("Refresh token has expired")
         except jwt.InvalidTokenError:
@@ -74,20 +75,57 @@ class JwtLogic:
         return await cls.acreate_user_jwt(user_info['sub'])
     
     @classmethod
-    def _get_jwt(cls, secret: str, sub: str, exp_sec: int) -> str:
+    def _encode_jwt(
+        cls,
+        secret: str,
+        exp_sec: int,
+        algorithm: Literal["HS256", "RS256"] = "HS256",
+        claims: dict[str, Union[str, int]] | None = None,
+    ) -> str:
         payload : dict[str, Union[str, int]] = {
-            "sub": sub,
             "iat": int(datetime.now().timestamp()),
             "exp": int((datetime.now() + timedelta(seconds=exp_sec)).timestamp()),
         }
 
-        return jwt.encode(payload, secret, cls.ALGORITHM)
+        if claims:
+            payload.update(claims)
+
+        return jwt.encode(payload, secret, algorithm=algorithm)
+
+    @classmethod
+    def create_github_app_jwt(
+        cls,
+        app_id: str,
+        private_key: str,
+        expire_seconds: int = 600,
+    ) -> str:
+        if not app_id:
+            raise ValueError("app_id is required for GitHub App JWT creation")
+        if not private_key:
+            raise ValueError("private_key is required for GitHub App JWT creation")
+
+        return cls._encode_jwt(
+            secret=private_key,
+            exp_sec=expire_seconds,
+            algorithm=cls.GITHUB_APP_ALGORITHM,
+            claims={"iss": app_id},
+        )
     
     @classmethod
     def _get_access_token_jwt(cls, id: str, expire_seconds: int):
-        return cls._get_jwt(cls.SECRET_KEY, id, expire_seconds)
+        return cls._encode_jwt(
+            secret=cls.SECRET_KEY,
+            exp_sec=expire_seconds,
+            algorithm=cls.AUTHSERVER_ALGORITHM,
+            claims={"sub": id},
+        )
 
     @classmethod
     def _get_refresh_token_jwt(cls, id: str):
-        return cls._get_jwt(cls.REFRESH_KEY, id, int(REFRESH_TOKEN_EXPIRE.total_seconds()))
+        return cls._encode_jwt(
+            secret=cls.REFRESH_KEY,
+            exp_sec=int(REFRESH_TOKEN_EXPIRE.total_seconds()),
+            algorithm=cls.AUTHSERVER_ALGORITHM,
+            claims={"sub": id},
+        )
     
