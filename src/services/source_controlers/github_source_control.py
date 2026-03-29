@@ -1,10 +1,12 @@
 import json
 import os
 from datetime import datetime
+from urllib.parse import urlparse
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from src.core.jwt_logic import JwtLogic
+from src.services.exceptions.source_control_exception import InvalidSourceControlRepositoryUrlError
 from src.services.source_control_models import IssuedAccessToken
 from src.services.source_controlers.base import SourceControlClient
 
@@ -20,15 +22,18 @@ class GitHubSourceControl(SourceControlClient):
         self.installation_id = installation_id or os.getenv("GITHUB_INSTALLATION_ID")
         self.pem_contents = self._load_pem_contents(pem_contents or os.getenv("GITHUB_PEM"))
 
-    def issue_access_token(self) -> IssuedAccessToken:
+    def issue_access_token(self, repo_url: str) -> IssuedAccessToken:
         github_app_jwt = JwtLogic.create_github_app_jwt(
             app_id=self._get_app_id(),
             private_key=self.pem_contents,
         )
+        request_body = json.dumps({
+            "repositories": [self._extract_repository_name(repo_url)],
+        }).encode("utf-8")
 
         request = Request(
             url=self._get_installation_access_token_url(),
-            data=b"{}",
+            data=request_body,
             headers={
                 "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {github_app_jwt}",
@@ -89,3 +94,19 @@ class GitHubSourceControl(SourceControlClient):
             return None
 
         return datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+
+    def _extract_repository_name(self, repo_url: str) -> str:
+        parsed_url = urlparse(repo_url)
+        path_parts = [part for part in parsed_url.path.split("/") if part]
+
+        if len(path_parts) < 2:
+            raise InvalidSourceControlRepositoryUrlError(repo_url=repo_url)
+
+        repository_name = path_parts[1]
+        if repository_name.endswith(".git"):
+            repository_name = repository_name[:-4]
+
+        if not repository_name:
+            raise InvalidSourceControlRepositoryUrlError(repo_url=repo_url)
+
+        return repository_name

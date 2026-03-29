@@ -5,5 +5,5 @@ from src.services.source_controlers.base import SourceControlClient
 
 
 class GitLabSourceControl(SourceControlClient):
-    def issue_access_token(self) -> IssuedAccessToken:
+    def issue_access_token(self, repo_url: str) -> IssuedAccessToken:
         raise NotImplementedError("GitLab source control is not implemented yet.")
