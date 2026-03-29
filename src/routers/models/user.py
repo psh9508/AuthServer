@@ -1,11 +1,12 @@
 import uuid
-from pydantic import ConfigDict, EmailStr, Field, field_validator
 from datetime import datetime
 from typing import Union
 
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
 from src.routers.models.base_response_model import BaseResponseData
 
-class LoginReq(BaseResponseData):
+class LoginReq(BaseModel):
     login_id: str = Field(...)
     password: str = Field(...)
 
@@ -20,7 +21,7 @@ class EmailVerificationRequiredRes(BaseResponseData):
 
 LoginRes = Union[LoginSuccessRes, EmailVerificationRequiredRes]
 
-class SignupReq(BaseResponseData):
+class SignupReq(BaseModel):
     email: EmailStr
     password: str
 
