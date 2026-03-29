@@ -27,7 +27,10 @@ class HttpMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         try:
-            if request.method == 'OPTIONS' or request.url.path in open_apis:
+            if (
+                request.method == 'OPTIONS'
+                or request.url.path in open_apis
+            ):
                 return await call_next(request)
             
             bearer_token = request.headers.get('Authorization')
