@@ -16,10 +16,10 @@ When it gets a login request, it verifies the login information and returns a `J
 
 ## How to start this project
 
-1. run docker-compose
+1. run docker compose
 
     ``` bash
-    docker-compose --env-file .env -f dependency/docker-compose.yml up -d
+    docker compose --env-file .env -f dependency/docker-compose.yml up -d
     ```
 
 2. run this project
