@@ -13,7 +13,7 @@ services:
     ports:
       - "54321:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - auth_data:/var/lib/postgresql/data
       - ./init/:/docker-entrypoint-initdb.d/
 
   redis:
@@ -130,7 +130,7 @@ networks:
 
 volumes:
   rabbitmq_data:
-  postgres_data:
+  auth_data:
   redis_data:
   victoriametrics-data:
   victorialogs-data:
