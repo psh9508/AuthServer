@@ -59,13 +59,6 @@ def get_logger_config() -> LoggerConfig:
     return _logger_config
 
 
-def is_source_control_provider_enabled(provider: str) -> bool:
-    config = get_config()
-    providers_config = config.get('source_control', {}).get('providers', [])
-    selected_provider = provider.strip().lower()
-    return selected_provider in [configured_provider.strip().lower() for configured_provider in providers_config]
-
-
 def _replace_env_values(config):
     for key, value in config.items():
         if isinstance(value, dict):
