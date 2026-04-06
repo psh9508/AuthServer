@@ -8,6 +8,8 @@ from src.core.jwt_logic import JwtLogic
 open_apis: list[str] = [
     '/docs',
     '/docs/',
+    '/health',
+    '/health/',
     '/docs/oauth2-redirect',
     '/healthcheck', 
     '/metrics',
