@@ -8,10 +8,10 @@ db:
     db: 0
     prefix: 'auth'
   postgres:
-    host: mimir-auth-db.cxowigk2a8k5.ap-northeast-2.rds.amazonaws.com
-    user: postgres
+    host: mimircdkstack-authdbinstance93a2d0c2-gpuhtst1x0xy.c5gqoi66wwnc.ap-northeast-2.rds.amazonaws.com
+    user: auth_admin
     port: 5432
-    database: postgres
+    database: auth
     password: ENV_DB_PASSWORD
     ssl_path: ssl/ap-northeast-2-bundle.pem
 

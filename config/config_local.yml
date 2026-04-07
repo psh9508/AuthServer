@@ -9,9 +9,9 @@ db:
     prefix: 'auth'
   postgres:
     host: localhost
-    user: postgres
+    user: auth_admin
     port: 54321
-    database: auth_db
+    database: auth
     password: ENV_DB_PASSWORD
     ssl_path: 'ssl/ap-northeast-2-bundle.pem'
 
