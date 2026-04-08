@@ -29,12 +29,12 @@ def load_config():
        
         _replace_env_values(_config)
 
-    # if not _config['server_name'] or not _config['exchange_name']:
-    #     raise ValueError("Missing required configuration values: 'server_name' or 'exchange_name'")
     if not _config['jwt']['refresh_secret'] or not _config['jwt']['secret']:
         raise ValueError("Missing required configuration values: 'refresh_secret' or 'secret'")
 
-    _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
+    if _config.get('server_name') and _config.get('exchange_name'):
+        _mq_config = MQConfig(server_name=_config['server_name'], exchange_name=_config['exchange_name'])
+        
     logger_config_dict = _config.get('logger', {})
     _logger_config = LoggerConfig(level=logger_config_dict.get('level', 'INFO'))
     # print(f"_config contents: {_config}")
