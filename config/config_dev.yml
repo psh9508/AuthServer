@@ -3,7 +3,7 @@ server_name: auth
 
 db:
   redis:
-    host: clustercfg.mimir-cache.micqoi.apn2.cache.amazonaws.com
+    host: authcache.qvcnpj.ng.0001.apn2.cache.amazonaws.com
     port: 6379
     db: 0
     prefix: 'auth'
