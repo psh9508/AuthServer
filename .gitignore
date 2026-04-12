@@ -9,3 +9,6 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# SSH/SSL keys
+*.pem

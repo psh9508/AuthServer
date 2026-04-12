@@ -1,0 +1,37 @@
+server_name: auth
+
+# Bastion server for SSH tunneling (local development only)
+bastion:
+  host: ec2-3-38-146-55.ap-northeast-2.compute.amazonaws.com
+  port: 22
+  user: ec2-user
+  key_path: ssl/sauron-bastion-key.pem
+
+db:
+  redis:
+    host: localhost
+    port: 6380
+    db: 0
+    prefix: auth
+    tunnel_target: authcache.qvcnpj.ng.0001.apn2.cache.amazonaws.com
+    tunnel_target_port: 6379
+  postgres:
+    host: localhost
+    user: auth_admin
+    port: 5433
+    database: auth
+    password: ${ENV_DB_PASSWORD}
+    ssl_path: ssl/ap-northeast-2-bundle.pem
+    tunnel_target: mimircdkstack-authdbinstance93a2d0c2-gpuhtst1x0xy.c5gqoi66wwnc.ap-northeast-2.rds.amazonaws.com
+    tunnel_target_port: 5432
+
+jwt:
+  secret: ${ENV_JWT_SECRET}
+  refresh_secret: ${ENV_JWT_REFRESH_SECRET}
+
+source_control:
+  providers:
+    - github
+
+logger:
+  level: DEBUG
