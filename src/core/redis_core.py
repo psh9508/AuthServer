@@ -1,7 +1,7 @@
 import json
 import redis.asyncio as redis
 from typing import Any, Optional
-from config.config import get_config
+from src.config.settings import get_settings
 from src.core.logger import get_logger
 
 logger = get_logger(__name__)
@@ -17,26 +17,26 @@ class RedisCore:
     def _append_prefix(self, key: str) -> str:  
         return f"{self.prefix}:{key}"    
     
-    async def ainitialize(self, config) -> redis.Redis:
-        redis_config = config['db']['redis']
-        host = redis_config['host']
-        port = redis_config.get('port', 6379)
-        db = redis_config.get('db', 0)
+    async def ainitialize(self, settings) -> redis.Redis:
+        redis_config = settings.db.redis
+        host = redis_config.host
+        port = redis_config.port
+        db = redis_config.db
         redis_url = f"redis://{host}:{port}"
-        
+
         self._client = redis.Redis.from_url(
             redis_url,
             db=db,
             decode_responses=True,
         )
 
-        self.prefix = redis_config['prefix']
+        self.prefix = redis_config.prefix
         return self._client
-    
+
     async def aget_client(self) -> redis.Redis:
         if self._client is None:
-            config = get_config()
-            return await self.ainitialize(config)
+            settings = get_settings()
+            return await self.ainitialize(settings)
 
         return self._client
     
@@ -155,10 +155,10 @@ class RedisCore:
 
 _redis_client = RedisCore()
 
-async def ainitialize_redis(config):
+async def ainitialize_redis(settings):
     try:
-        redis = await _redis_client.ainitialize(config)
-        await redis.ping()
+        redis_instance = await _redis_client.ainitialize(settings)
+        await redis_instance.ping()
     except Exception as e:
         raise RuntimeError("Failed to initialize Redis") from e
 

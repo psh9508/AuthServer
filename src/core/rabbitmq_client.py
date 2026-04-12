@@ -3,22 +3,24 @@ from fastapi import Depends
 import pika
 from pika.adapters.asyncio_connection import AsyncioConnection
 
-from config.config import get_rabbitmq_config
+from src.config.settings import get_settings
 from src.core.logger import get_logger
-from src.data_model.mq_config import MQConfig
 from src.data_model.rabbitmq_messages.mq_message import MQMessage
 
 logger = get_logger(__name__)
 
-class RabbitMQClient:    
-    def __init__(self, config):
-        rabbitmq_config = config['rabbitmq']
-        self.host = rabbitmq_config['host']
-        self.port = rabbitmq_config['port']
-        self.user = rabbitmq_config['user']
-        self.password = rabbitmq_config['password']
-        self.vhost = rabbitmq_config['vhost']
-        
+class RabbitMQClient:
+    def __init__(self, settings):
+        if settings.rabbitmq is None:
+            raise ValueError("RabbitMQ configuration is not set")
+
+        rabbitmq_config = settings.rabbitmq
+        self.host = rabbitmq_config.host
+        self.port = rabbitmq_config.port
+        self.user = rabbitmq_config.user
+        self.password = rabbitmq_config.password
+        self.vhost = rabbitmq_config.vhost
+
         self.next_seq = 0
         self.publish_lock = asyncio.Lock()
         self.connected_event = asyncio.Event()
@@ -26,8 +28,8 @@ class RabbitMQClient:
         self.connection = None
         self.channel = None
         self.is_init = False
-        self.exchange_name = get_rabbitmq_config().exchange_name
-        self.server_name = get_rabbitmq_config().server_name
+        self.exchange_name = settings.exchange_name
+        self.server_name = settings.server_name
         self.outstanding = {}  # seq: (message, event_id)
         self.delivery_subscribers = []
     

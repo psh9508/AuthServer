@@ -11,7 +11,7 @@ open_apis: list[str] = [
     '/health',
     '/health/',
     '/docs/oauth2-redirect',
-    '/healthcheck', 
+    '/healthcheck',
     '/metrics',
     '/metrics/',
     '/openapi.json',
@@ -20,6 +20,8 @@ open_apis: list[str] = [
     '/user/signup',
     '/auth/user_verification',
     '/auth/regenerate_verification_code',
+    '/test',
+    '/test/',
 ]
 
 class HttpMiddleware(BaseHTTPMiddleware):

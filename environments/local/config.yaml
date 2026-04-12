@@ -6,29 +6,29 @@ db:
     host: localhost
     port: 63791
     db: 0
-    prefix: 'auth'
+    prefix: auth
   postgres:
     host: localhost
     user: auth_admin
     port: 54321
     database: auth
-    password: ENV_DB_PASSWORD
-    ssl_path: 'ssl/ap-northeast-2-bundle.pem'
+    password: ${ENV_DB_PASSWORD}
+    ssl_path: ssl/ap-northeast-2-bundle.pem
 
 rabbitmq:
   host: localhost
   port: 5672
   user: user
-  password: ENV_RABBITMQ_PASSWORD
+  password: ${ENV_RABBITMQ_PASSWORD}
   vhost: my_vhost
-  
+
 jwt:
-  secret: ENV_JWT_SECRET
-  refresh_secret: ENV_JWT_REFRESH_SECRET
+  secret: ${ENV_JWT_SECRET}
+  refresh_secret: ${ENV_JWT_REFRESH_SECRET}
 
 source_control:
   providers:
     - github
 
 logger:
-  level: DEBUG 
+  level: DEBUG

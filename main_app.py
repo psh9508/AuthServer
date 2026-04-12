@@ -3,7 +3,7 @@ import asyncpg
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import asynccontextmanager
-from config.config import load_config
+from src.config.settings import get_settings
 from src.core.worker import Worker
 from src.services.message_queue_service import MessageQueueService
 from src.middleware.http_middleware import HttpMiddleware
@@ -16,13 +16,13 @@ from src.core.logger import get_logger
 async def lifespan(_: FastAPI):
     logger = get_logger(__name__)
     logger.info("Starting up...")
-    config = load_config()
+    settings = get_settings()
     logger = get_logger(__name__)
-    JwtLogic.initialize(config)
+    JwtLogic.initialize(settings)
     logger.info("Loaded configuration...")
-    await initializeDependencies(config)
+    await initializeDependencies(settings)
     logger.info("Loaded Dependencies...")
-    # await MessageQueueService.ainitialize_rabbitmq(config)
+    # await MessageQueueService.ainitialize_rabbitmq(settings)
     # logger.info("Initialized RabbitMQ client...")
     init_db_session()
     logger.info("Initialized DB session...")
@@ -30,7 +30,7 @@ async def lifespan(_: FastAPI):
     # asyncio.create_task(worker.astart_worker())
     # logger.info("The worker has been started...")
     yield
-    
+
     # logger.info("Shutting down...")
     # await worker.astop_worker()
     # logger.info("The worker has been shut down...")
@@ -51,20 +51,20 @@ def get_main_app():
     return app
 
     
-async def initializeDependencies(config):
-    await ainitialize_redis(config)
-    await aconnect_to_db(config)
-    
+async def initializeDependencies(settings):
+    await ainitialize_redis(settings)
+    await aconnect_to_db(settings)
 
-async def aconnect_to_db(config):
+
+async def aconnect_to_db(settings):
     logger = get_logger(__name__)
     global db_pool
-    db_config = config['db']['postgres']
-    user = db_config['user']
-    password = db_config['password']
-    host = db_config['host']
-    port = db_config.get('port', 5432)
-    database = db_config['database']
+    pg_config = settings.db.postgres
+    user = pg_config.user
+    password = pg_config.password
+    host = pg_config.host
+    port = pg_config.port
+    database = pg_config.database
 
     try:
         db_pool = await asyncpg.create_pool(

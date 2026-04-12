@@ -1,18 +1,17 @@
 server_name: auth
-# exchange_name: my_exchange.topic
 
 db:
   redis:
     host: authcache.qvcnpj.ng.0001.apn2.cache.amazonaws.com
     port: 6379
     db: 0
-    prefix: 'auth'
+    prefix: auth
   postgres:
     host: mimircdkstack-authdbinstance93a2d0c2-gpuhtst1x0xy.c5gqoi66wwnc.ap-northeast-2.rds.amazonaws.com
     user: auth_admin
     port: 5432
     database: auth
-    password: ENV_DB_PASSWORD
+    password: ${ENV_DB_PASSWORD}
     ssl_path: ssl/ap-northeast-2-bundle.pem
 
 # rabbitmq:
@@ -21,10 +20,10 @@ db:
 #   user: user
 #   password: ENV_RABBITMQ_PASSWORD
 #   vhost: my_vhost
-  
+
 jwt:
-  secret: ENV_JWT_SECRET
-  refresh_secret: ENV_JWT_REFRESH_SECRET
+  secret: ${ENV_JWT_SECRET}
+  refresh_secret: ${ENV_JWT_REFRESH_SECRET}
 
 source_control:
   providers:

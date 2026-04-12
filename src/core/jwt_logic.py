@@ -13,9 +13,9 @@ class JwtLogic:
     is_initialized = False
 
     @classmethod
-    def initialize(cls, config: dict):
-        cls.SECRET_KEY = config['jwt']['secret']
-        cls.REFRESH_KEY = config['jwt']['refresh_secret']
+    def initialize(cls, settings):
+        cls.SECRET_KEY = settings.jwt.secret
+        cls.REFRESH_KEY = settings.jwt.refresh_secret
         cls.is_initialized = True
 
     @classmethod

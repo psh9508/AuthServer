@@ -15,9 +15,9 @@ class MessageQueueService:
         self.core = rabbitmq_core
 
     @staticmethod
-    async def ainitialize_rabbitmq(config):
+    async def ainitialize_rabbitmq(settings):
         global _rabbitmq_client
-        _rabbitmq_client = RabbitMQClient(config)
+        _rabbitmq_client = RabbitMQClient(settings)
         await _rabbitmq_client.ainitialize_message_queue()
 
     
