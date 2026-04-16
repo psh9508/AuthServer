@@ -114,7 +114,6 @@ async def lifespan(_: FastAPI):
         if not start_dev_local_tunnel():
             raise RuntimeError("Failed to start SSM tunnel")
 
-    logger = get_logger(__name__)
     JwtLogic.initialize(settings)
     logger.info("Loaded configuration...")
     await initializeDependencies(settings)

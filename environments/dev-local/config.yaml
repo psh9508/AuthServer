@@ -29,9 +29,9 @@ jwt:
   secret: ${ENV_JWT_SECRET}
   refresh_secret: ${ENV_JWT_REFRESH_SECRET}
 
-source_control:
-  providers:
-    - github
+sauron:
+  repository_id: 4
+  endpoint: https://d20367he0nkpcu.cloudfront.net
 
 logger:
   level: DEBUG

@@ -2,25 +2,25 @@ import traceback
 import httpx
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/test", tags=["test"])
+from src.config.settings import get_settings
 
-SAURON_BASE_URL = "https://d20367he0nkpcu.cloudfront.net"
+router = APIRouter(prefix="/test", tags=["test"])
 
 
 async def analyze_by_sauron(
-    repository_id: int,
     error_message: str,
     stack_trace: str
 ) -> dict:
+    settings = get_settings()
     request_body = {
-        "repository_id": repository_id,
+        "repository_id": settings.sauron.repository_id,
         "error_message": error_message,
         "stack_trace": stack_trace,
     }
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{SAURON_BASE_URL}/analyze",
+            f"{settings.sauron.endpoint}/analyze",
             json=request_body,
             headers={"Content-Type": "application/json"},
         )
@@ -33,7 +33,6 @@ async def test_error():
         return 1 / 0
     except Exception as e:
         result = await analyze_by_sauron(
-            repository_id=1,
             error_message=str(e),
             stack_trace=traceback.format_exc(),
         )

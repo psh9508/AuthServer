@@ -50,8 +50,9 @@ class JWTConfig(BaseModel):
     refresh_secret: str = Field(..., description="JWT refresh secret key")
 
 
-class SourceControlConfig(BaseModel):
-    providers: list[str] = Field(default_factory=list, description="Source control providers")
+class SauronConfig(BaseModel):
+    repository_id: int = Field(..., description="Repository ID for Sauron")
+    endpoint: str = Field(..., description="Sauron service endpoint")
 
 
 class LoggerConfig(BaseModel):
@@ -66,7 +67,7 @@ class AppSettings(BaseModel):
     db: DatabaseConfig
     rabbitmq: Optional[RabbitMQConfig] = Field(default=None)
     jwt: JWTConfig
-    source_control: Optional[SourceControlConfig] = Field(default=None)
+    sauron: Optional[SauronConfig] = Field(default=None)
     logger: LoggerConfig = Field(default_factory=LoggerConfig)
 
 
