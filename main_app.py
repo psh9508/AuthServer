@@ -4,6 +4,7 @@ import socket
 import subprocess
 import signal
 import asyncpg
+from sauron_python import sauron_sdk
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -113,6 +114,12 @@ async def lifespan(_: FastAPI):
     if env == "dev-local":
         if not start_dev_local_tunnel():
             raise RuntimeError("Failed to start SSM tunnel")
+
+    sauron_sdk.init(
+        repository_id=settings.sauron.repository_id,
+        endpoint=settings.sauron.endpoint,
+    )
+    logger.info("Initialized Sauron SDK...")
 
     JwtLogic.initialize(settings)
     logger.info("Loaded configuration...")

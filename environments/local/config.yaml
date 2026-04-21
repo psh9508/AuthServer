@@ -28,7 +28,7 @@ jwt:
 
 sauron:
   repository_id: 5
-  endpoint: http://localhost:8002
+  endpoint: http://localhost:8002/analyze
 
 logger:
   level: DEBUG
