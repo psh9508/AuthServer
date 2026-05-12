@@ -9,7 +9,6 @@ class JwtLogic:
     SECRET_KEY: str
     REFRESH_KEY: str
     AUTHSERVER_ALGORITHM: str = "HS256"
-    GITHUB_APP_ALGORITHM: str = "RS256"
     is_initialized = False
 
     @classmethod
@@ -92,25 +91,6 @@ class JwtLogic:
 
         return jwt.encode(payload, secret, algorithm=algorithm)
 
-    @classmethod
-    def create_github_app_jwt(
-        cls,
-        app_id: str,
-        private_key: str,
-        expire_seconds: int = 600,
-    ) -> str:
-        if not app_id:
-            raise ValueError("app_id is required for GitHub App JWT creation")
-        if not private_key:
-            raise ValueError("private_key is required for GitHub App JWT creation")
-
-        return cls._encode_jwt(
-            secret=private_key,
-            exp_sec=expire_seconds,
-            algorithm=cls.GITHUB_APP_ALGORITHM,
-            claims={"iss": app_id},
-        )
-    
     @classmethod
     def _get_access_token_jwt(cls, id: str, expire_seconds: int):
         return cls._encode_jwt(
