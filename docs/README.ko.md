@@ -12,10 +12,10 @@
 
 ## How to start this project
 
-1. docker-compose 파일 실행
+1. docker compose 파일 실행
 
     ``` bash
-    docker-compose --env-file .env -f dependency/docker-compose.yml up -d
+    docker compose --env-file .env -f dependency/docker-compose.yml up -d
     ```
 
 2. project 실행
