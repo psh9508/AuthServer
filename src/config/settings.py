@@ -45,9 +45,18 @@ class RabbitMQConfig(BaseModel):
     vhost: str = Field(default="/", description="RabbitMQ virtual host")
 
 
+class JWTHS256Config(BaseModel):
+    secret: str = Field(..., description="JWT HS256 secret key")
+    refresh_secret: str = Field(..., description="JWT HS256 refresh secret key")
+
+
+class JWTRS256Config(BaseModel):
+    secret: str = Field(..., description="JWT RS256 private key")
+
+
 class JWTConfig(BaseModel):
-    secret: str = Field(..., description="JWT secret key")
-    refresh_secret: str = Field(..., description="JWT refresh secret key")
+    hs256: JWTHS256Config
+    rs256: JWTRS256Config
 
 
 class SauronConfig(BaseModel):
