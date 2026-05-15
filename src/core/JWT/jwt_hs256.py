@@ -1,30 +1,30 @@
-from datetime import datetime, timedelta
-from typing import Literal, Union
+
+
 import jwt
 
-from src.factories.redis import get_redis_service
-from src.constants.jwt_constants import REFRESH_TOKEN_EXPIRE
+from AuthServer.src.core.JWT.jwt_logic import JwtLogic
+from AuthServer.src.factories.redis import get_redis_service
 
-class JwtLogic:
-    SECRET_KEY: str
-    REFRESH_KEY: str
-    AUTHSERVER_ALGORITHM: str = "HS256"
-    is_initialized = False
 
+class JWT_HS256(JwtLogic):
+    
     @classmethod
     def initialize(cls, settings):
-        cls.SECRET_KEY = settings.jwt.secret
-        cls.REFRESH_KEY = settings.jwt.refresh_secret
+        cls.SECRET_KEY = settings.jwt.hs256.secret
+        cls.REFRESH_KEY = settings.jwt.hs256.refresh_secret
+        cls.AUTHSERVER_ALGORITHM = "HS256"
         cls.is_initialized = True
+
 
     @classmethod
     async def adecode_access_token(cls, token: str) -> dict | None:
         try:
-            return jwt.decode(token, cls.SECRET_KEY, [cls.AUTHSERVER_ALGORITHM])
+            return jwt.decode(token, cls.SECRET_KEY, algorithms=[cls.AUTHSERVER_ALGORITHM])
         except Exception:
             # Expired or tampered token
             return None
         
+
     @classmethod
     async def acreate_user_jwt(cls, id: str, expire_seconds: int = 1800):
         if not cls.is_initialized:
@@ -41,6 +41,7 @@ class JwtLogic:
             'access_token': access_token,
             'refresh_token': refresh_token,
         }
+    
 
     @classmethod
     async def arefresh_access_token(cls, access_token:str, refresh_token: str):
@@ -72,40 +73,4 @@ class JwtLogic:
             raise PermissionError("Invalid refresh token")
         
         return await cls.acreate_user_jwt(user_info['sub'])
-    
-    @classmethod
-    def _encode_jwt(
-        cls,
-        secret: str,
-        exp_sec: int,
-        algorithm: Literal["HS256", "RS256"] = "HS256",
-        claims: dict[str, Union[str, int]] | None = None,
-    ) -> str:
-        payload : dict[str, Union[str, int]] = {
-            "iat": int(datetime.now().timestamp()),
-            "exp": int((datetime.now() + timedelta(seconds=exp_sec)).timestamp()),
-        }
-
-        if claims:
-            payload.update(claims)
-
-        return jwt.encode(payload, secret, algorithm=algorithm)
-
-    @classmethod
-    def _get_access_token_jwt(cls, id: str, expire_seconds: int):
-        return cls._encode_jwt(
-            secret=cls.SECRET_KEY,
-            exp_sec=expire_seconds,
-            algorithm=cls.AUTHSERVER_ALGORITHM,
-            claims={"sub": id},
-        )
-
-    @classmethod
-    def _get_refresh_token_jwt(cls, id: str):
-        return cls._encode_jwt(
-            secret=cls.REFRESH_KEY,
-            exp_sec=int(REFRESH_TOKEN_EXPIRE.total_seconds()),
-            algorithm=cls.AUTHSERVER_ALGORITHM,
-            claims={"sub": id},
-        )
     
