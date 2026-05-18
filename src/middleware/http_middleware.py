@@ -21,6 +21,7 @@ open_apis: list[str] = [
     '/user/signup',
     '/auth/user_verification',
     '/auth/regenerate_verification_code',
+    '/auth/refresh_access_token',
     '/test',
     '/test/',
 ]

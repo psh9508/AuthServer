@@ -23,11 +23,7 @@ rabbitmq:
   vhost: my_vhost
 
 jwt:
-  hs256:
-    secret: ${ENV_JWT_SECRET}
-    refresh_secret: ${ENV_JWT_REFRESH_SECRET}
-  rs256:
-    secret: ${ENV_JWT_PRIVATE_KEY}
+  secret_path: ssl/jwt_private.pem
 
 sauron:
   repository_id: 5

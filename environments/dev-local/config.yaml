@@ -26,8 +26,7 @@ db:
     tunnel_target_port: 5432
 
 jwt:
-  secret: ${ENV_JWT_SECRET}
-  refresh_secret: ${ENV_JWT_REFRESH_SECRET}
+  secret_path: ssl/jwt_private.pem
 
 sauron:
   repository_id: 4

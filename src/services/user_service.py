@@ -35,8 +35,8 @@ class UserService:
                 record_login_failure('email_not_verified')
                 raise EmailNotVerifiedError(user_id=str(user.user_id))
 
-            asyncio.create_task(self.redis_service.adelete_login_attempts_count(login_id))        
-            
+            asyncio.create_task(self.redis_service.adelete_login_attempts_count(login_id))
+
             jwt_result = await JwtLogic.acreate_user_jwt(str(user.user_id))
 
             await self.redis_service.arefresh_refresh_token(
