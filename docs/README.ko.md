@@ -9,6 +9,8 @@
   - `JWT`의 Refresh token을 관리하기 위한 저장소
 - Docker
   - 다양한 의존성을 쉽게 연결하기 위해서 사용
+- KMS (AWS Key Management Service)
+  - JWT 서명 키의 암호화/복호화에 사용. 인프라 구성은 Terraform으로 관리: [tf_authserver](https://github.com/psh9508/tf_authserver)
 
 ## How to start this project
 

@@ -13,6 +13,8 @@ When it gets a login request, it verifies the login information and returns a `J
   - The datastore that manages JWT refresh tokens.
 - Docker
   - To easily connect various dependencies.
+- KMS (AWS Key Management Service)
+  - Used to encrypt/decrypt JWT signing keys. The infrastructure setup is managed via Terraform: [tf_authserver](https://github.com/psh9508/tf_authserver).
 
 ## How to start this project
 
