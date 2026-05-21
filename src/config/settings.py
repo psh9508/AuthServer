@@ -8,7 +8,7 @@ from typing import Optional
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -46,16 +46,8 @@ class RabbitMQConfig(BaseModel):
 
 
 class JWTConfig(BaseModel):
-    secret_path: str = Field(..., description="Path to JWT RS256 private key file")
-    secret: str = Field(default="", description="JWT RS256 private key content (loaded from secret_path)")
-
-    @model_validator(mode='after')
-    def load_key_from_file(self) -> JWTConfig:
-        key_path = Path(self.secret_path)
-        if not key_path.is_absolute():
-            key_path = ROOT_DIR / key_path
-        self.secret = key_path.read_text(encoding="utf-8").strip()
-        return self
+    kms_key_id: str = Field(..., description="AWS KMS key ID or alias (e.g. alias/authserver-key)")
+    region: str = Field(default="ap-northeast-2", description="AWS region for KMS")
 
 
 class SauronConfig(BaseModel):

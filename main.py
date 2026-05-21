@@ -10,6 +10,7 @@ from src.routers.user import router as user_router
 from src.routers.base import router as base_router
 from src.routers.auth import router as auth_router
 from src.routers.test import router as test_router
+from src.routers.jwks import router as jwks_router
 from src.routers.models.base import HealthCheckRes
 from src.routers.models.base_response_model import BaseResponseModel
 
@@ -20,6 +21,7 @@ app.include_router(user_router)
 app.include_router(base_router)
 app.include_router(auth_router)
 app.include_router(test_router)
+app.include_router(jwks_router)
 
 @app.get("/health", tags=["health"])
 async def health() -> BaseResponseModel:

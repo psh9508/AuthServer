@@ -26,7 +26,7 @@ db:
     tunnel_target_port: 5432
 
 jwt:
-  secret_path: ssl/jwt_private.pem
+  kms_key_id: alias/authserver-key
 
 sauron:
   repository_id: 4

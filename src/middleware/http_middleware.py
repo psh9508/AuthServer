@@ -24,6 +24,7 @@ open_apis: list[str] = [
     '/auth/refresh_access_token',
     '/test',
     '/test/',
+    '/.well-known/jwks.json',
 ]
 
 class HttpMiddleware(BaseHTTPMiddleware):
