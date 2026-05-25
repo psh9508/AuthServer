@@ -1,48 +1,61 @@
-import asyncio
 import base64
-import json
 from datetime import datetime, timedelta
 from typing import Union
-
-import boto3
 import jwt
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_der_public_key
+from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key, Encoding, PublicFormat
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
 from src.constants.jwt_constants import REFRESH_TOKEN_EXPIRE
 
 ALGORITHM = "RS256"
 
 
-def _b64url(data: bytes) -> str:
-    return base64.urlsafe_b64encode(data).rstrip(b"=").decode()
-
-
 class JwtLogic:
+    _private_key: str | None = None
     _public_key: str | None = None
-    _kms_client = None
-    _kms_key_id: str | None = None
 
     @classmethod
     def initialize(cls, settings):
-        cls._kms_key_id = settings.jwt.kms_key_id
-        cls._kms_client = boto3.client("kms", region_name=settings.jwt.region)
+        cls._private_key = settings.jwt.secret
+        private_key_obj = load_pem_private_key(cls._private_key.encode(), password=None)
+        cls._public_key = private_key_obj.public_key().public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo).decode()
 
-        response = cls._kms_client.get_public_key(KeyId=cls._kms_key_id)
-        cls._public_key = load_der_public_key(response["PublicKey"]).public_bytes(
-            Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
-        ).decode()
+    @classmethod
+    def get_jwks(cls) -> dict:
+        if not cls._public_key:
+            raise RuntimeError("JwtLogic not initialized")
+
+        public_key_obj = load_pem_public_key(cls._public_key.encode())
+        if not isinstance(public_key_obj, RSAPublicKey):
+            raise ValueError("Only RSA public keys are supported")
+
+        pub_numbers = public_key_obj.public_numbers()
+
+        def _int_to_base64url(n: int) -> str:
+            byte_len = (n.bit_length() + 7) // 8
+            return base64.urlsafe_b64encode(n.to_bytes(byte_len, "big")).rstrip(b"=").decode()
+
+        return {
+            "keys": [
+                {
+                    "kty": "RSA",
+                    "use": "sig",
+                    "alg": "RS256",
+                    "n": _int_to_base64url(pub_numbers.n),
+                    "e": _int_to_base64url(pub_numbers.e),
+                }
+            ]
+        }
 
     @classmethod
     async def acreate_user_jwt(cls, id: str, expire_seconds: int = 1800):
         if not id:
             raise ValueError("sub or user_id is required for JWT creation")
 
-        loop = asyncio.get_event_loop()
-        access_token, refresh_token = await asyncio.gather(
-            loop.run_in_executor(None, cls._encode_jwt, expire_seconds, {"sub": id}),
-            loop.run_in_executor(None, cls._encode_jwt, int(REFRESH_TOKEN_EXPIRE.total_seconds()), {"sub": id}),
-        )
-        return {'access_token': access_token, 'refresh_token': refresh_token}
+        return {
+            'access_token': cls._encode_jwt(expire_seconds, {"sub": id}),
+            'refresh_token': cls._encode_jwt(int(REFRESH_TOKEN_EXPIRE.total_seconds()), {"sub": id}),
+        }
 
     @classmethod
     async def adecode_access_token(cls, token: str) -> dict | None:
@@ -93,15 +106,4 @@ class JwtLogic:
         }
         if claims:
             payload.update(claims)
-
-        header_b64 = _b64url(json.dumps({"alg": "RS256", "typ": "JWT"}, separators=(",", ":")).encode())
-        payload_b64 = _b64url(json.dumps(payload, separators=(",", ":")).encode())
-        signing_input = f"{header_b64}.{payload_b64}".encode()
-
-        response = cls._kms_client.sign(
-            KeyId=cls._kms_key_id,
-            Message=signing_input,
-            MessageType="RAW",
-            SigningAlgorithm="RSASSA_PKCS1_V1_5_SHA_256",
-        )
-        return f"{header_b64}.{payload_b64}.{_b64url(response['Signature'])}"
+        return jwt.encode(payload, cls._private_key, algorithm=ALGORITHM)
