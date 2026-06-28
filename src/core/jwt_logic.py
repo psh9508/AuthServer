@@ -10,8 +10,11 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat,
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
 from src.constants.jwt_constants import REFRESH_TOKEN_EXPIRE
+from src.core.logger import get_logger
 
 ALGORITHM = "RS256"
+
+_logger = get_logger(__name__)
 
 
 def _b64url(data: bytes) -> str:
@@ -28,11 +31,12 @@ class JwtLogic:
         cls._kms_key_id = settings.jwt.kms_key_id
         cls._kms_client = boto3.client("kms", region_name=settings.jwt.region)
 
-        # TODO: Task Role에 kms:GetPublicKey 권한 부여 후 주석 해제
-        # response = cls._kms_client.get_public_key(KeyId=cls._kms_key_id)
-        # cls._public_key = load_der_public_key(response["PublicKey"]).public_bytes(
-        #     Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
-        # ).decode()
+        _logger.info("Fetching public key from KMS: %s", cls._kms_key_id)
+        response = cls._kms_client.get_public_key(KeyId=cls._kms_key_id)
+        cls._public_key = load_der_public_key(response["PublicKey"]).public_bytes(
+            Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
+        ).decode()
+        _logger.info("KMS public key loaded successfully")
 
     @classmethod
     def get_jwks(cls) -> dict:
