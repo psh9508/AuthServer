@@ -28,10 +28,11 @@ class JwtLogic:
         cls._kms_key_id = settings.jwt.kms_key_id
         cls._kms_client = boto3.client("kms", region_name=settings.jwt.region)
 
-        response = cls._kms_client.get_public_key(KeyId=cls._kms_key_id)
-        cls._public_key = load_der_public_key(response["PublicKey"]).public_bytes(
-            Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
-        ).decode()
+        # TODO: Task Role에 kms:GetPublicKey 권한 부여 후 주석 해제
+        # response = cls._kms_client.get_public_key(KeyId=cls._kms_key_id)
+        # cls._public_key = load_der_public_key(response["PublicKey"]).public_bytes(
+        #     Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
+        # ).decode()
 
     @classmethod
     def get_jwks(cls) -> dict:
